@@ -1,0 +1,38 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.env
+venv/
+.venv/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# 앱에 불필요한 데이터
+data/raw/seoul_airbnb_geo_masked.csv
+data/external/
+data/processed/X_train_host.csv
+data/processed/X_test_host.csv
+data/processed/y_train_host_log.csv
+data/processed/y_train_host_orig.csv
+data/processed/y_test_host_log.csv
+data/processed/y_test_host_orig.csv
+data/processed/seoul_airbnb_features.csv
+data/processed/district_aggregated.csv
+
+# 분석 산출물 (앱 불필요)
+agents/
+reports/
+pre_notebook/
+notebooks/
+SOP_ANALYSIS.json
+SOP_ANALYSIS.md
+CLAUDE.md
+README.md
