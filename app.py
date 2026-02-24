@@ -2,10 +2,9 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.font_manager as fm
 import platform
-import warnings
 
-warnings.filterwarnings('ignore')
 
 # ── 페이지 설정 (반드시 첫 번째 st 명령) ─────────────────────────────────────
 st.set_page_config(
@@ -16,13 +15,32 @@ st.set_page_config(
 )
 
 # ── 한글 폰트 설정 ─────────────────────────────────────────────────────────────
-if platform.system() == 'Darwin':
-    plt.rc('font', family='AppleGothic')
-elif platform.system() == 'Windows':
-    plt.rc('font', family='Malgun Gothic')
-else:
-    plt.rc('font', family='NanumGothic')
-plt.rc('axes', unicode_minus=False)
+def set_korean_font():
+    """macOS/Windows/Linux 환경에서 사용 가능한 한글 폰트 자동 설정"""
+    system = platform.system()
+
+    if system == 'Darwin':  # macOS
+        font_candidates = ['AppleGothic', 'Apple SD Gothic Neo', 'Arial Unicode MS']
+    elif system == 'Windows':
+        font_candidates = ['Malgun Gothic', 'NanumGothic', 'Gulim']
+    else:  # Linux
+        font_candidates = ['NanumGothic', 'NanumBarunGothic', 'UnDotum']
+
+    # 사용 가능한 첫 번째 폰트 찾기
+    available_fonts = [f.name for f in fm.fontManager.ttflist]
+    for font in font_candidates:
+        if font in available_fonts:
+            plt.rcParams['font.family'] = font
+            plt.rcParams['axes.unicode_minus'] = False
+            return font
+
+    # 폰트를 찾지 못한 경우 기본 설정
+    plt.rcParams['font.family'] = 'sans-serif'
+    plt.rcParams['axes.unicode_minus'] = False
+    return 'default'
+
+# 한글 폰트 적용
+korean_font = set_korean_font()
 
 # ── CSS 스타일 ─────────────────────────────────────────────────────────────────
 st.markdown("""
@@ -166,6 +184,8 @@ with st.sidebar:
         return default
 
     bench_adr     = bench_val('ttm_avg_rate', 100000)
+    bench_adr_p25 = bench_val('ttm_avg_rate', 70000,  25)
+    bench_adr_p75 = bench_val('ttm_avg_rate', 140000, 75)
     bench_occ     = bench_val('ttm_occupancy', 0.40)
     bench_revpar  = bench_val('ttm_revpar', 40000)
     bench_photos  = bench_val('photos_count', 22)
@@ -358,6 +378,118 @@ with tab2:
         "내 RevPAR",
         f"₩{my_revpar:,.0f}",
         delta=f"벤치마크 대비 ₩{my_revpar - bench_revpar:+,.0f}",
+    )
+
+    # ── 적정 요금 추천 ────────────────────────────────────────────────────────
+    st.markdown("---")
+    st.subheader("💡 내 숙소에 맞는 적정 요금은?")
+
+    # 호스트 단계 판별
+    if my_superhost and my_rating >= 4.8 and my_reviews >= 50:
+        host_stage = "프리미엄"
+        rec_min    = int(bench_adr)
+        rec_max    = int(bench_adr_p75)
+        stage_color = "#FF6B35"
+        stage_icon  = "🏆"
+        stage_desc  = "슈퍼호스트 + 높은 평점 + 풍부한 리뷰 — 시장 상위 요금을 받을 수 있는 단계입니다."
+        stage_tip   = "지금 ADR이 시장 중위값 아래라면, 10~20% 인상을 테스트해보세요."
+    elif my_reviews >= 10 and my_rating >= 4.5:
+        host_stage = "안정"
+        rec_min    = int(bench_adr_p25)
+        rec_max    = int(bench_adr)
+        stage_color = "#4CAF50"
+        stage_icon  = "📈"
+        stage_desc  = "리뷰와 평점이 안정 궤도에 올라온 단계입니다."
+        stage_tip   = "슈퍼호스트 달성 이후 ADR을 시장 중위값 이상으로 올릴 수 있습니다."
+    else:
+        host_stage = "신규"
+        rec_min    = max(int(bep_adr), int(bench_adr_p25 * 0.85))
+        rec_max    = int(bench_adr_p25)
+        stage_color = "#2196F3"
+        stage_icon  = "🌱"
+        stage_desc  = "첫 예약과 리뷰 확보가 최우선인 단계입니다."
+        stage_tip   = "지금은 가격보다 리뷰가 중요합니다. 시장 하위 25% 요금으로 첫 10건을 빠르게 확보하세요."
+
+    # 3단계 요금 구간 시각화
+    tier_col1, tier_col2, tier_col3 = st.columns(3)
+
+    with tier_col1:
+        is_current = host_stage == "신규"
+        bg = stage_color if is_current else "#f0f0f0"
+        fc = "white" if is_current else "#888"
+        border = f"3px solid {stage_color}" if is_current else "1px solid #ddd"
+        st.markdown(
+            f'<div style="border:{border};border-radius:10px;padding:16px;text-align:center;background:{bg};color:{fc};">'
+            f'<div style="font-size:22px;">🌱</div>'
+            f'<div style="font-weight:bold;font-size:15px;margin:6px 0;">신규 호스트</div>'
+            f'<div style="font-size:11px;margin-bottom:8px;">리뷰 10건 미만 또는 평점 4.5 미만</div>'
+            f'<div style="font-size:18px;font-weight:bold;">₩{int(bench_adr_p25 * 0.85):,}<br>~ ₩{int(bench_adr_p25):,}</div>'
+            f'<div style="font-size:11px;margin-top:6px;">시장 하위 25% 구간<br>첫 예약 확보 최우선</div>'
+            f'</div>',
+            unsafe_allow_html=True,
+        )
+
+    with tier_col2:
+        is_current = host_stage == "안정"
+        bg = "#4CAF50" if is_current else "#f0f0f0"
+        fc = "white" if is_current else "#888"
+        border = "3px solid #4CAF50" if is_current else "1px solid #ddd"
+        st.markdown(
+            f'<div style="border:{border};border-radius:10px;padding:16px;text-align:center;background:{bg};color:{fc};">'
+            f'<div style="font-size:22px;">📈</div>'
+            f'<div style="font-weight:bold;font-size:15px;margin:6px 0;">안정 호스트</div>'
+            f'<div style="font-size:11px;margin-bottom:8px;">리뷰 10건 이상 + 평점 4.5 이상</div>'
+            f'<div style="font-size:18px;font-weight:bold;">₩{int(bench_adr_p25):,}<br>~ ₩{int(bench_adr):,}</div>'
+            f'<div style="font-size:11px;margin-top:6px;">시장 중위값 구간<br>슈퍼호스트 달성 준비</div>'
+            f'</div>',
+            unsafe_allow_html=True,
+        )
+
+    with tier_col3:
+        is_current = host_stage == "프리미엄"
+        bg = "#FF6B35" if is_current else "#f0f0f0"
+        fc = "white" if is_current else "#888"
+        border = "3px solid #FF6B35" if is_current else "1px solid #ddd"
+        st.markdown(
+            f'<div style="border:{border};border-radius:10px;padding:16px;text-align:center;background:{bg};color:{fc};">'
+            f'<div style="font-size:22px;">🏆</div>'
+            f'<div style="font-weight:bold;font-size:15px;margin:6px 0;">프리미엄 호스트</div>'
+            f'<div style="font-size:11px;margin-bottom:8px;">슈퍼호스트 + 평점 4.8+ + 리뷰 50건+</div>'
+            f'<div style="font-size:18px;font-weight:bold;">₩{int(bench_adr):,}<br>~ ₩{int(bench_adr_p75):,}</div>'
+            f'<div style="font-size:11px;margin-top:6px;">시장 상위 25% 구간<br>ADR 프리미엄 적용 가능</div>'
+            f'</div>',
+            unsafe_allow_html=True,
+        )
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    # 현재 내 위치 + 추천 요약
+    rec_box_color = stage_color
+    if my_adr < rec_min:
+        gap_msg = f"현재 요금이 추천 구간보다 **₩{rec_min - my_adr:,} 낮습니다.** 조금 올려도 괜찮습니다."
+        gap_icon = "⬆️"
+    elif my_adr > rec_max:
+        gap_msg = f"현재 요금이 추천 구간보다 **₩{my_adr - rec_max:,} 높습니다.** 점유율이 낮다면 조정을 고려하세요."
+        gap_icon = "⚠️"
+    else:
+        gap_msg = "현재 요금이 내 단계에 맞는 구간 안에 있습니다."
+        gap_icon = "✅"
+
+    st.markdown(
+        f'<div style="background:{rec_box_color}18;border-left:4px solid {rec_box_color};'
+        f'border-radius:6px;padding:16px;margin-top:4px;">'
+        f'<div style="font-size:14px;font-weight:bold;color:{rec_box_color};">'
+        f'{stage_icon} 현재 내 단계: {host_stage} 호스트</div>'
+        f'<div style="font-size:13px;margin:6px 0;"><b>추천 요금 구간: ₩{rec_min:,} ~ ₩{rec_max:,}</b></div>'
+        f'<div style="font-size:12px;color:#555;">{stage_desc}</div>'
+        f'<div style="font-size:12px;margin-top:8px;color:#333;">{gap_icon} {gap_msg}</div>'
+        f'<div style="font-size:12px;margin-top:6px;color:#666;">💬 {stage_tip}</div>'
+        f'<div style="font-size:11px;margin-top:8px;color:#999;">'
+        f'* 본전 요금(BEP): ₩{int(bep_adr):,} | 시장 하위25%: ₩{int(bench_adr_p25):,} | '
+        f'시장 중위: ₩{int(bench_adr):,} | 시장 상위25%: ₩{int(bench_adr_p75):,}'
+        f'</div>'
+        f'</div>',
+        unsafe_allow_html=True,
     )
 
     st.markdown("---")
