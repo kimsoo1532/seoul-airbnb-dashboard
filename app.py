@@ -2,10 +2,9 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.font_manager as fm
 import platform
-import warnings
 
-warnings.filterwarnings('ignore')
 
 # ── 페이지 설정 (반드시 첫 번째 st 명령) ─────────────────────────────────────
 st.set_page_config(
@@ -16,13 +15,32 @@ st.set_page_config(
 )
 
 # ── 한글 폰트 설정 ─────────────────────────────────────────────────────────────
-if platform.system() == 'Darwin':
-    plt.rc('font', family='AppleGothic')
-elif platform.system() == 'Windows':
-    plt.rc('font', family='Malgun Gothic')
-else:
-    plt.rc('font', family='NanumGothic')
-plt.rc('axes', unicode_minus=False)
+def set_korean_font():
+    """macOS/Windows/Linux 환경에서 사용 가능한 한글 폰트 자동 설정"""
+    system = platform.system()
+
+    if system == 'Darwin':  # macOS
+        font_candidates = ['AppleGothic', 'Apple SD Gothic Neo', 'Arial Unicode MS']
+    elif system == 'Windows':
+        font_candidates = ['Malgun Gothic', 'NanumGothic', 'Gulim']
+    else:  # Linux
+        font_candidates = ['NanumGothic', 'NanumBarunGothic', 'UnDotum']
+
+    # 사용 가능한 첫 번째 폰트 찾기
+    available_fonts = [f.name for f in fm.fontManager.ttflist]
+    for font in font_candidates:
+        if font in available_fonts:
+            plt.rcParams['font.family'] = font
+            plt.rcParams['axes.unicode_minus'] = False
+            return font
+
+    # 폰트를 찾지 못한 경우 기본 설정
+    plt.rcParams['font.family'] = 'sans-serif'
+    plt.rcParams['axes.unicode_minus'] = False
+    return 'default'
+
+# 한글 폰트 적용
+korean_font = set_korean_font()
 
 # ── CSS 스타일 ─────────────────────────────────────────────────────────────────
 st.markdown("""
