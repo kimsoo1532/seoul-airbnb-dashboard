@@ -393,7 +393,7 @@ def render_hero():
     st.markdown("""
     <div style="
       background: linear-gradient(135deg, #FF5A5F 0%, #E8484D 55%, #C62828 100%);
-      border-radius: 22px; padding: 42px 28px 38px; text-align: center;
+      border-radius: 22px; padding: 52px 28px 48px; text-align: center;
       margin-bottom: 28px; position: relative; overflow: hidden;
     ">
       <!-- 장식 원 -->
@@ -404,42 +404,15 @@ def render_hero():
       <div style="position:absolute;top:20px;left:30px;width:60px;height:60px;
         background:rgba(255,255,255,0.06);border-radius:50%;pointer-events:none;"></div>
       <div style="position:relative;z-index:1;">
-        <div style="font-size:52px;margin-bottom:10px;filter:drop-shadow(0 4px 8px rgba(0,0,0,0.2));">🏠</div>
-        <h1 style="color:white;font-size:27px;font-weight:800;margin:0 0 8px;
-          line-height:1.3;letter-spacing:-0.5px;text-shadow:0 2px 8px rgba(0,0,0,0.15);">
-          서울 에어비앤비<br>수익 최적화 플래너
+        <div style="font-size:52px;margin-bottom:14px;filter:drop-shadow(0 4px 8px rgba(0,0,0,0.2));">🏠</div>
+        <h1 style="color:white;font-size:32px;font-weight:900;margin:0 0 14px;
+          line-height:1.2;letter-spacing:-1px;text-shadow:0 2px 12px rgba(0,0,0,0.2);">
+          에어비앤비 최적화 플래너
         </h1>
-        <p style="color:rgba(255,255,255,0.88);font-size:13px;margin:0 0 26px;
-          text-shadow:0 1px 4px rgba(0,0,0,0.1);">
-          실운영 데이터 기반 · 무료 · 3분 완성 · 서울 25개 자치구
+        <p style="color:rgba(255,255,255,0.85);font-size:14px;margin:0;
+          text-shadow:0 1px 4px rgba(0,0,0,0.1);letter-spacing:0.2px;">
+          내 숙소에 딱 맞는 수익 전략을 3분 만에 찾아드립니다
         </p>
-        <div style="display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-bottom:20px;">
-          <div style="background:rgba(255,255,255,0.18);border-radius:12px;padding:12px 20px;
-            backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,0.2);">
-            <div style="font-size:22px;font-weight:800;color:white;">32,061</div>
-            <div style="font-size:10px;color:rgba(255,255,255,0.85);margin-top:2px;">전체 리스팅</div>
-          </div>
-          <div style="background:rgba(255,255,255,0.18);border-radius:12px;padding:12px 20px;
-            backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,0.2);">
-            <div style="font-size:22px;font-weight:800;color:white;">₩47,850</div>
-            <div style="font-size:10px;color:rgba(255,255,255,0.85);margin-top:2px;">실운영 평균 RevPAR/일</div>
-          </div>
-          <div style="background:rgba(255,255,255,0.18);border-radius:12px;padding:12px 20px;
-            backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,0.2);">
-            <div style="font-size:22px;font-weight:800;color:white;">+83%</div>
-            <div style="font-size:10px;color:rgba(255,255,255,0.85);margin-top:2px;">슈퍼호스트 수익 프리미엄</div>
-          </div>
-        </div>
-        <div style="display:flex;justify-content:center;gap:8px;flex-wrap:wrap;">
-          <span style="background:rgba(255,255,255,0.22);color:white;padding:4px 12px;
-            border-radius:20px;font-size:11px;font-weight:600;">📊 수익 분석</span>
-          <span style="background:rgba(255,255,255,0.22);color:white;padding:4px 12px;
-            border-radius:20px;font-size:11px;font-weight:600;">💡 요금 추천</span>
-          <span style="background:rgba(255,255,255,0.22);color:white;padding:4px 12px;
-            border-radius:20px;font-size:11px;font-weight:600;">🗺️ 위치 분석</span>
-          <span style="background:rgba(255,255,255,0.22);color:white;padding:4px 12px;
-            border-radius:20px;font-size:11px;font-weight:600;">🏙️ 시장 진단</span>
-        </div>
       </div>
     </div>
     """, unsafe_allow_html=True)
