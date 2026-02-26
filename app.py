@@ -118,6 +118,13 @@ st.markdown("""
     font-size: 12px; font-weight: 600; margin-right: 4px;
   }
 
+  /* 네비게이션 버튼 정렬 — back-btn/nav-balance 마크다운 래퍼를 0높이로 */
+  div[data-testid="stMarkdownContainer"]:has(.back-btn),
+  div[data-testid="stMarkdownContainer"]:has(.nav-balance) {
+    height: 0 !important; min-height: 0 !important;
+    overflow: hidden !important; margin: 0 !important; padding: 0 !important;
+  }
+
   /* 탭 스타일 */
   .stTabs [data-baseweb="tab-list"] {
     gap: 6px; background: #F5F5F5; border-radius: 12px;
@@ -351,6 +358,8 @@ def init_state():
         # 요금
         "my_adr": None,
         "my_occ_pct": None,
+        "weekday_occ_pct": 0,
+        "weekend_occ_pct": 0,
         # 운영비
         "opex_elec": 80000, "opex_water": 30000, "opex_mgmt": 150000,
         "opex_net": 30000, "opex_clean": 200000, "opex_loan": 0, "opex_etc": 50000,
@@ -889,6 +898,7 @@ def step2_new():
             st.session_state.step = 1
             st.rerun()
     with nc2:
+        st.markdown('<div class="nav-balance"></div>', unsafe_allow_html=True)
         if st.button("다음 단계 →", key="next2n", use_container_width=True):
             st.session_state.step = 3
             st.rerun()
@@ -942,6 +952,8 @@ def step2_existing():
      wd_booked, wd_total,
      we_booked, we_total) = render_calendar()
     st.session_state.my_occ_pct = int(occ_rate * 100)
+    st.session_state.weekday_occ_pct = int(weekday_occ * 100)
+    st.session_state.weekend_occ_pct = int(weekend_occ * 100)
 
     # 예약률 요약 — 평일 / 주말 분리
     my_revpar = my_adr * occ_rate
@@ -979,6 +991,7 @@ def step2_existing():
             st.session_state.step = 1
             st.rerun()
     with nc2:
+        st.markdown('<div class="nav-balance"></div>', unsafe_allow_html=True)
         if st.button("다음 단계 →", key="next2e", use_container_width=True):
             st.session_state.step = 3
             st.rerun()
@@ -1033,6 +1046,7 @@ def step3():
             st.session_state.step = 2
             st.rerun()
     with nc2:
+        st.markdown('<div class="nav-balance"></div>', unsafe_allow_html=True)
         next_step = 5 if st.session_state.host_type == "new" else 4
         label = "🔍 분석 결과 보기" if next_step == 5 else "다음 단계 →"
         if st.button(label, key="next3", use_container_width=True):
@@ -1133,6 +1147,7 @@ def step4_existing():
             st.session_state.step = 3
             st.rerun()
     with nc2:
+        st.markdown('<div class="nav-balance"></div>', unsafe_allow_html=True)
         if st.button("🔍 분석 결과 보기", key="next4", use_container_width=True):
             st.session_state.step = 5
             st.rerun()
@@ -1246,6 +1261,37 @@ def step5():
 
         if host_type == "new":
             st.info(f"💡 신규 호스터는 실제 예약 데이터가 없어 지역 평균 예약률({b_occ:.0%})로 계산했습니다.")
+
+        # 예약률 평일/주말 분리 — 기존 호스터만 표시
+        if host_type == "existing":
+            wd_occ_pct = st.session_state.get("weekday_occ_pct", 0)
+            we_occ_pct = st.session_state.get("weekend_occ_pct", 0)
+            overall_pct = int(my_occ * 100)
+            wd_col = "#2E7D32" if wd_occ_pct >= overall_pct else "#767676"
+            we_col = "#FF5A5F" if we_occ_pct >= overall_pct else "#767676"
+            st.markdown(
+                f'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px;">'
+                f'<div style="background:white;border-radius:12px;padding:14px 10px;text-align:center;'
+                f'box-shadow:0 2px 8px rgba(0,0,0,0.06);">'
+                f'<div style="font-size:11px;color:#888;margin-bottom:4px;">전체 예약률</div>'
+                f'<div style="font-size:24px;font-weight:700;color:#484848;">{overall_pct}%</div>'
+                f'<div style="font-size:11px;color:#AAA;">지역 평균 {b_occ:.0%}</div>'
+                f'</div>'
+                f'<div style="background:white;border-radius:12px;padding:14px 10px;text-align:center;'
+                f'box-shadow:0 2px 8px rgba(0,0,0,0.06);">'
+                f'<div style="font-size:11px;color:#888;margin-bottom:4px;">📅 평일 예약률</div>'
+                f'<div style="font-size:24px;font-weight:700;color:{wd_col};">{wd_occ_pct}%</div>'
+                f'<div style="font-size:11px;color:#AAA;">월 ~ 금</div>'
+                f'</div>'
+                f'<div style="background:white;border-radius:12px;padding:14px 10px;text-align:center;'
+                f'box-shadow:0 2px 8px rgba(0,0,0,0.06);">'
+                f'<div style="font-size:11px;color:#888;margin-bottom:4px;">🎉 주말 예약률</div>'
+                f'<div style="font-size:24px;font-weight:700;color:{we_col};">{we_occ_pct}%</div>'
+                f'<div style="font-size:11px;color:#AAA;">토 ~ 일</div>'
+                f'</div>'
+                f'</div>',
+                unsafe_allow_html=True,
+            )
 
         st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
         section_title("💰 월 손익 계산서", "이번 달 예상 수익 구조입니다.")
