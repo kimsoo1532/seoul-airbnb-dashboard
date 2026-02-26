@@ -117,6 +117,33 @@ st.markdown("""
     display: inline-block; padding: 3px 10px; border-radius: 20px;
     font-size: 12px; font-weight: 600; margin-right: 4px;
   }
+
+  /* 탭 스타일 */
+  .stTabs [data-baseweb="tab-list"] {
+    gap: 6px; background: #F5F5F5; border-radius: 12px;
+    padding: 4px; border-bottom: none !important;
+  }
+  .stTabs [data-baseweb="tab"] {
+    border-radius: 8px !important; padding: 8px 14px !important;
+    font-size: 13px !important; font-weight: 600 !important;
+    color: #767676 !important; background: transparent !important;
+    border: none !important; white-space: nowrap;
+  }
+  .stTabs [aria-selected="true"] {
+    background: white !important; color: #FF5A5F !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.09) !important;
+  }
+  .stTabs [data-baseweb="tab-panel"] { padding: 20px 0 0 !important; }
+
+  /* 모든 버튼 높이 통일 (네비게이션 정렬) */
+  .stButton > button { min-height: 52px !important; }
+
+  /* 히어로 섹션 */
+  .hero-section {
+    background: linear-gradient(135deg, #FF5A5F 0%, #E8484D 60%, #C62828 100%);
+    border-radius: 20px; padding: 40px 28px 36px; text-align: center;
+    margin-bottom: 28px; position: relative; overflow: hidden;
+  }
 </style>
 """, unsafe_allow_html=True)
 
@@ -362,6 +389,61 @@ def render_logo():
     </div>
     """, unsafe_allow_html=True)
 
+def render_hero():
+    st.markdown("""
+    <div style="
+      background: linear-gradient(135deg, #FF5A5F 0%, #E8484D 55%, #C62828 100%);
+      border-radius: 22px; padding: 42px 28px 38px; text-align: center;
+      margin-bottom: 28px; position: relative; overflow: hidden;
+    ">
+      <!-- 장식 원 -->
+      <div style="position:absolute;top:-40px;right:-40px;width:180px;height:180px;
+        background:rgba(255,255,255,0.07);border-radius:50%;pointer-events:none;"></div>
+      <div style="position:absolute;bottom:-50px;left:-50px;width:200px;height:200px;
+        background:rgba(255,255,255,0.05);border-radius:50%;pointer-events:none;"></div>
+      <div style="position:absolute;top:20px;left:30px;width:60px;height:60px;
+        background:rgba(255,255,255,0.06);border-radius:50%;pointer-events:none;"></div>
+      <div style="position:relative;z-index:1;">
+        <div style="font-size:52px;margin-bottom:10px;filter:drop-shadow(0 4px 8px rgba(0,0,0,0.2));">🏠</div>
+        <h1 style="color:white;font-size:27px;font-weight:800;margin:0 0 8px;
+          line-height:1.3;letter-spacing:-0.5px;text-shadow:0 2px 8px rgba(0,0,0,0.15);">
+          서울 에어비앤비<br>수익 최적화 플래너
+        </h1>
+        <p style="color:rgba(255,255,255,0.88);font-size:13px;margin:0 0 26px;
+          text-shadow:0 1px 4px rgba(0,0,0,0.1);">
+          실운영 데이터 기반 · 무료 · 3분 완성 · 서울 25개 자치구
+        </p>
+        <div style="display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-bottom:20px;">
+          <div style="background:rgba(255,255,255,0.18);border-radius:12px;padding:12px 20px;
+            backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,0.2);">
+            <div style="font-size:22px;font-weight:800;color:white;">32,061</div>
+            <div style="font-size:10px;color:rgba(255,255,255,0.85);margin-top:2px;">전체 리스팅</div>
+          </div>
+          <div style="background:rgba(255,255,255,0.18);border-radius:12px;padding:12px 20px;
+            backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,0.2);">
+            <div style="font-size:22px;font-weight:800;color:white;">₩47,850</div>
+            <div style="font-size:10px;color:rgba(255,255,255,0.85);margin-top:2px;">실운영 평균 RevPAR/일</div>
+          </div>
+          <div style="background:rgba(255,255,255,0.18);border-radius:12px;padding:12px 20px;
+            backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,0.2);">
+            <div style="font-size:22px;font-weight:800;color:white;">+83%</div>
+            <div style="font-size:10px;color:rgba(255,255,255,0.85);margin-top:2px;">슈퍼호스트 수익 프리미엄</div>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:center;gap:8px;flex-wrap:wrap;">
+          <span style="background:rgba(255,255,255,0.22);color:white;padding:4px 12px;
+            border-radius:20px;font-size:11px;font-weight:600;">📊 수익 분석</span>
+          <span style="background:rgba(255,255,255,0.22);color:white;padding:4px 12px;
+            border-radius:20px;font-size:11px;font-weight:600;">💡 요금 추천</span>
+          <span style="background:rgba(255,255,255,0.22);color:white;padding:4px 12px;
+            border-radius:20px;font-size:11px;font-weight:600;">🗺️ 위치 분석</span>
+          <span style="background:rgba(255,255,255,0.22);color:white;padding:4px 12px;
+            border-radius:20px;font-size:11px;font-weight:600;">🏙️ 시장 진단</span>
+        </div>
+      </div>
+    </div>
+    """, unsafe_allow_html=True)
+
 def render_progress(current_step):
     host_type = st.session_state.get("host_type", "existing")
     if host_type == "new":
@@ -509,13 +591,33 @@ def render_calendar():
 
     booked_count = len(booked)
     occ_rate = booked_count / days_in_month if days_in_month > 0 else 0
-    return occ_rate, booked_count, days_in_month
+
+    # 평일 / 주말 분리 (월~금=평일, 토~일=주말)
+    weekdays_total = weekends_total = weekdays_booked = weekends_booked = 0
+    for d in range(1, days_in_month + 1):
+        dow = datetime(year, month, d).weekday()  # 0=Mon..4=Fri, 5=Sat, 6=Sun
+        if dow >= 5:
+            weekends_total += 1
+            if d in booked:
+                weekends_booked += 1
+        else:
+            weekdays_total += 1
+            if d in booked:
+                weekdays_booked += 1
+
+    weekday_occ = weekdays_booked / weekdays_total if weekdays_total > 0 else 0
+    weekend_occ = weekends_booked / weekends_total if weekends_total > 0 else 0
+
+    return (occ_rate, booked_count, days_in_month,
+            weekday_occ, weekend_occ,
+            weekdays_booked, weekdays_total,
+            weekends_booked, weekends_total)
 
 # ─────────────────────────────────────────────────────────────────────────────
 # STEP 1 — 숙소 기본 정보 + 호스터 유형 선택
 # ─────────────────────────────────────────────────────────────────────────────
 def step1():
-    render_logo()
+    render_hero()
     render_progress(1)
     section_title("1단계: 내 숙소 기본 정보", "숙소 위치, 종류, 그리고 호스팅 경험을 선택해주세요.")
 
@@ -609,13 +711,53 @@ def step1():
             st.rerun()
         st.markdown("</div>", unsafe_allow_html=True)
 
-    st.markdown("<br>", unsafe_allow_html=True)
+    # ── 피처 하이라이트 ──────────────────────────────────────────────────────
+    st.markdown('<hr style="border:none;border-top:1.5px solid #F0F0F0;margin:24px 0 20px;">', unsafe_allow_html=True)
+    st.markdown("""
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px;">
+      <div style="background:white;border-radius:14px;padding:16px 12px;text-align:center;
+        box-shadow:0 2px 10px rgba(0,0,0,0.06);border:1.5px solid #FFF0EE;">
+        <div style="font-size:28px;margin-bottom:6px;">📊</div>
+        <div style="font-weight:700;font-size:12px;color:#484848;margin-bottom:4px;">수익 분석</div>
+        <div style="font-size:10px;color:#888;">손익 + RevPAR 비교</div>
+      </div>
+      <div style="background:white;border-radius:14px;padding:16px 12px;text-align:center;
+        box-shadow:0 2px 10px rgba(0,0,0,0.06);border:1.5px solid #FFF0EE;">
+        <div style="font-size:28px;margin-bottom:6px;">💡</div>
+        <div style="font-weight:700;font-size:12px;color:#484848;margin-bottom:4px;">요금 추천</div>
+        <div style="font-size:10px;color:#888;">단계별 적정 요금</div>
+      </div>
+      <div style="background:white;border-radius:14px;padding:16px 12px;text-align:center;
+        box-shadow:0 2px 10px rgba(0,0,0,0.06);border:1.5px solid #FFF0EE;">
+        <div style="font-size:28px;margin-bottom:6px;">🗺️</div>
+        <div style="font-weight:700;font-size:12px;color:#484848;margin-bottom:4px;">위치 분석</div>
+        <div style="font-size:10px;color:#888;">2km 내 관광지 분석</div>
+      </div>
+      <div style="background:white;border-radius:14px;padding:16px 12px;text-align:center;
+        box-shadow:0 2px 10px rgba(0,0,0,0.06);border:1.5px solid #FFF0EE;">
+        <div style="font-size:28px;margin-bottom:6px;">🏙️</div>
+        <div style="font-weight:700;font-size:12px;color:#484848;margin-bottom:4px;">시장 진단</div>
+        <div style="font-size:10px;color:#888;">자치구 군집 전략</div>
+      </div>
+    </div>
+    """, unsafe_allow_html=True)
+
     if ht is None:
         st.info("위에서 호스터 유형을 선택해야 다음 단계로 넘어갈 수 있습니다.")
     else:
         if st.button("다음 단계 →", key="next1", use_container_width=True):
             st.session_state.step = 2
             st.rerun()
+
+    st.markdown("""
+    <div style="text-align:center;margin-top:20px;padding:12px;background:#F7F7F7;border-radius:12px;">
+      <span style="font-size:11px;color:#AAA;">
+        🔒 입력하신 정보는 저장되지 않습니다 &nbsp;·&nbsp;
+        📅 데이터 기간: 2024-10 ~ 2025-09 &nbsp;·&nbsp;
+        🏠 32,061개 리스팅 기반
+      </span>
+    </div>
+    """, unsafe_allow_html=True)
 
 # ─────────────────────────────────────────────────────────────────────────────
 # STEP 2-NEW — 신규 호스터: 숙소 상세 설정
@@ -766,14 +908,13 @@ def step2_new():
         st.info("주소를 입력하고 [📍 확인]을 누르면 더 정확한 주변 관광지 분석이 가능합니다.")
 
     # ── 네비게이션 ───────────────────────────────────────────────────────────
-    st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown("<div style='margin-top:20px;'></div>", unsafe_allow_html=True)
     nc1, nc2 = st.columns(2)
     with nc1:
         st.markdown('<div class="back-btn">', unsafe_allow_html=True)
         if st.button("← 이전", key="back2n", use_container_width=True):
             st.session_state.step = 1
             st.rerun()
-        st.markdown("</div>", unsafe_allow_html=True)
     with nc2:
         if st.button("다음 단계 →", key="next2n", use_container_width=True):
             st.session_state.step = 3
@@ -823,37 +964,47 @@ def step2_existing():
         unsafe_allow_html=True,
     )
 
-    occ_rate, booked_count, days_in_month = render_calendar()
+    (occ_rate, booked_count, days_in_month,
+     weekday_occ, weekend_occ,
+     wd_booked, wd_total,
+     we_booked, we_total) = render_calendar()
     st.session_state.my_occ_pct = int(occ_rate * 100)
 
-    # 예약률 요약
+    # 예약률 요약 — 평일 / 주말 분리
     my_revpar = my_adr * occ_rate
+    wd_color = "#484848" if weekday_occ <= weekend_occ else "#FF5A5F"
+    we_color = "#FF5A5F" if weekend_occ >= weekday_occ else "#E8484D"
     coral_box(
-        f'<div style="display:flex;justify-content:space-around;align-items:center;flex-wrap:wrap;gap:16px;">'
-        f'<div style="text-align:center;">'
-        f'<div style="font-size:12px;color:#888;">예약일 / 총 일수</div>'
-        f'<div style="font-size:22px;font-weight:700;color:#FF5A5F;">{booked_count}일 / {days_in_month}일</div>'
+        f'<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;align-items:center;text-align:center;">'
+        f'<div>'
+        f'<div style="font-size:11px;color:#888;margin-bottom:4px;">예약일 / 총 일수</div>'
+        f'<div style="font-size:18px;font-weight:700;color:#FF5A5F;">{booked_count}일 / {days_in_month}일</div>'
         f'</div>'
-        f'<div style="text-align:center;">'
-        f'<div style="font-size:12px;color:#888;">이번 달 예약률</div>'
-        f'<div style="font-size:22px;font-weight:700;color:#FF5A5F;">{occ_rate:.0%}</div>'
+        f'<div style="border-left:1.5px solid #FFD0CF;padding-left:8px;">'
+        f'<div style="font-size:11px;color:#888;margin-bottom:4px;">📅 평일 예약률</div>'
+        f'<div style="font-size:20px;font-weight:700;color:{wd_color};">{weekday_occ:.0%}</div>'
+        f'<div style="font-size:10px;color:#AAA;">{wd_booked}/{wd_total}일</div>'
         f'</div>'
-        f'<div style="text-align:center;">'
-        f'<div style="font-size:12px;color:#888;">하루 평균 실수익</div>'
-        f'<div style="font-size:22px;font-weight:700;color:#FF5A5F;">₩{int(my_revpar):,}</div>'
+        f'<div style="border-left:1.5px solid #FFD0CF;padding-left:8px;">'
+        f'<div style="font-size:11px;color:#888;margin-bottom:4px;">🎉 주말 예약률</div>'
+        f'<div style="font-size:20px;font-weight:700;color:{we_color};">{weekend_occ:.0%}</div>'
+        f'<div style="font-size:10px;color:#AAA;">{we_booked}/{we_total}일</div>'
+        f'</div>'
+        f'<div style="border-left:1.5px solid #FFD0CF;padding-left:8px;">'
+        f'<div style="font-size:11px;color:#888;margin-bottom:4px;">하루 평균 실수익</div>'
+        f'<div style="font-size:18px;font-weight:700;color:#FF5A5F;">₩{int(my_revpar):,}</div>'
         f'</div>'
         f'</div>'
     )
 
     # ── 네비게이션 ───────────────────────────────────────────────────────────
-    st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown("<div style='margin-top:20px;'></div>", unsafe_allow_html=True)
     nc1, nc2 = st.columns(2)
     with nc1:
         st.markdown('<div class="back-btn">', unsafe_allow_html=True)
         if st.button("← 이전", key="back2e", use_container_width=True):
             st.session_state.step = 1
             st.rerun()
-        st.markdown("</div>", unsafe_allow_html=True)
     with nc2:
         if st.button("다음 단계 →", key="next2e", use_container_width=True):
             st.session_state.step = 3
@@ -901,14 +1052,13 @@ def step3():
         f'<div style="font-size:12px;color:#AAA;margin-top:4px;">에어비앤비 수수료 3%는 별도입니다</div>'
     )
 
-    st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown("<div style='margin-top:20px;'></div>", unsafe_allow_html=True)
     nc1, nc2 = st.columns(2)
     with nc1:
         st.markdown('<div class="back-btn">', unsafe_allow_html=True)
         if st.button("← 이전", key="back3", use_container_width=True):
             st.session_state.step = 2
             st.rerun()
-        st.markdown("</div>", unsafe_allow_html=True)
     with nc2:
         next_step = 5 if st.session_state.host_type == "new" else 4
         label = "🔍 분석 결과 보기" if next_step == 5 else "다음 단계 →"
@@ -1002,14 +1152,13 @@ def step4_existing():
                 st.session_state.my_lat, st.session_state.my_lng = dc
                 st.session_state.my_location_name = dn(st.session_state.district) + " (자치구 평균)"
 
-    st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown("<div style='margin-top:20px;'></div>", unsafe_allow_html=True)
     nc1, nc2 = st.columns(2)
     with nc1:
         st.markdown('<div class="back-btn">', unsafe_allow_html=True)
         if st.button("← 이전", key="back4", use_container_width=True):
             st.session_state.step = 3
             st.rerun()
-        st.markdown("</div>", unsafe_allow_html=True)
     with nc2:
         if st.button("🔍 분석 결과 보기", key="next4", use_container_width=True):
             st.session_state.step = 5
@@ -1082,453 +1231,463 @@ def step5():
     </div>
     """, unsafe_allow_html=True)
 
-    # ── A. 요약 KPI ──────────────────────────────────────────────────────────
+    # ── 탭 구성 ─────────────────────────────────────────────────────────────
     st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
-    k1, k2, k3 = st.columns(3)
-    revpar_diff  = my_revpar - b_revpar
-    profit_color = "#2E7D32" if net_profit > 0 else "#C62828"
-    bep_ok       = my_adr >= bep_adr
 
-    def kpi_card(col, label, value, sub, sub_color="#767676"):
-        col.markdown(
-            f'<div style="background:white;border-radius:12px;padding:18px;text-align:center;'
-            f'box-shadow:0 2px 10px rgba(0,0,0,0.06);">'
-            f'<div style="font-size:12px;color:#888;margin-bottom:6px;">{label}</div>'
-            f'<div style="font-size:22px;font-weight:700;color:#484848;">{value}</div>'
-            f'<div style="font-size:12px;color:{sub_color};margin-top:4px;">{sub}</div>'
-            f'</div>',
-            unsafe_allow_html=True,
-        )
-
-    kpi_card(k1, "하루 평균 실수익", f"₩{int(my_revpar):,}",
-             f"{'▲' if revpar_diff>=0 else '▼'} 지역 평균 대비 ₩{int(abs(revpar_diff)):,}",
-             "#2E7D32" if revpar_diff >= 0 else "#C62828")
-    kpi_card(k2, "월 예상 순이익", f"₩{int(net_profit):,}",
-             "흑자 ✅" if net_profit > 0 else "적자 ❌", profit_color)
-    kpi_card(k3, "본전 요금", f"₩{int(bep_adr):,}",
-             f"현재 요금 {'이상 ✅' if bep_ok else '이하 ❌'}",
-             "#2E7D32" if bep_ok else "#C62828")
-
-    if host_type == "new":
-        st.info(f"💡 신규 호스터는 실제 예약 데이터가 없어 지역 평균 예약률({b_occ:.0%})로 계산했습니다.")
-
-    # ── B. 적정 요금 추천 ────────────────────────────────────────────────────
-    st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
-    section_title("💡 내 숙소에 맞는 적정 요금")
-
-    if my_superhost and my_rating >= 4.8 and my_reviews >= 50:
-        stage, s_color, s_icon = "프리미엄", "#FF5A5F", "🏆"
-        rec_min, rec_max = int(b_adr), int(b_adr_p75)
-        s_tip = "현재 요금이 지역 평균보다 낮다면 10~20% 인상을 테스트해보세요."
-    elif my_reviews >= 10 and my_rating >= 4.5:
-        stage, s_color, s_icon = "안정", "#00A699", "📈"
-        rec_min, rec_max = int(b_adr_p25), int(b_adr)
-        s_tip = "슈퍼호스트 달성 후 요금을 지역 평균 이상으로 올릴 수 있습니다."
+    if host_type == "existing":
+        tab1, tab2, tab3, tab4, tab5 = st.tabs([
+            "📊 수익 요약", "💡 요금 전략", "📍 주변 관광지", "📋 운영 개선", "🏙️ 지역 진단"
+        ])
     else:
-        stage, s_color, s_icon = "신규", "#2196F3", "🌱"
-        rec_min = max(int(bep_adr), int(b_adr_p25 * 0.85))
-        rec_max = int(b_adr_p25)
-        s_tip = "하위 25% 요금으로 첫 10건의 리뷰를 빠르게 쌓은 후 요금을 올리세요."
+        tab1, tab2, tab3, tab4 = st.tabs([
+            "📊 수익 요약", "💡 요금 추천", "📍 주변 관광지", "🏙️ 지역 진단"
+        ])
+        tab5 = None
 
-    t1, t2, t3 = st.columns(3)
-    stage_data = [
-        ("신규", "🌱", "#2196F3", f"₩{int(b_adr_p25*0.85):,} ~ ₩{int(b_adr_p25):,}", "리뷰 10건 미만"),
-        ("안정", "📈", "#00A699", f"₩{int(b_adr_p25):,} ~ ₩{int(b_adr):,}", "리뷰 10건+ & 평점 4.5+"),
-        ("프리미엄", "🏆", "#FF5A5F", f"₩{int(b_adr):,} ~ ₩{int(b_adr_p75):,}", "슈퍼호스트 & 평점 4.8+"),
-    ]
-    for col, (sname, sicon, scolor, sprice, scond) in zip([t1, t2, t3], stage_data):
-        is_me = sname == stage
-        bg    = scolor if is_me else "#F7F7F7"
-        fc    = "white" if is_me else "#767676"
-        border = f"3px solid {scolor}" if is_me else "2px solid #EBEBEB"
-        me_tag = (f'<div style="margin-top:8px;"><span style="background:white;color:{scolor};'
-                  f'padding:2px 10px;border-radius:20px;font-size:11px;font-weight:700;">▲ 내 단계</span></div>'
-                  if is_me else "")
-        col.markdown(
-            f'<div style="border:{border};border-radius:12px;padding:18px;text-align:center;background:{bg};color:{fc};">'
-            f'<div style="font-size:22px;">{sicon}</div>'
-            f'<div style="font-weight:700;font-size:14px;margin:6px 0;">{sname} 호스트</div>'
-            f'<div style="font-size:11px;opacity:0.85;margin-bottom:8px;">{scond}</div>'
-            f'<div style="font-size:15px;font-weight:700;">{sprice}</div>'
-            f'{me_tag}</div>',
-            unsafe_allow_html=True,
-        )
+    # ── TAB 1: 수익 요약 (KPI + 손익계산서) ─────────────────────────────────
+    with tab1:
+        k1, k2, k3 = st.columns(3)
+        revpar_diff  = my_revpar - b_revpar
+        profit_color = "#2E7D32" if net_profit > 0 else "#C62828"
+        bep_ok       = my_adr >= bep_adr
 
-    st.markdown("<br>", unsafe_allow_html=True)
-    if my_adr < rec_min:
-        gap_msg, gap_icon, gap_bg = (f"현재 요금 ₩{int(my_adr):,}이 추천 구간보다 ₩{rec_min - int(my_adr):,} 낮습니다.", "⬆️", "#E3F2FD")
-    elif my_adr > rec_max:
-        gap_msg, gap_icon, gap_bg = (f"현재 요금 ₩{int(my_adr):,}이 추천 구간보다 ₩{int(my_adr) - rec_max:,} 높습니다.", "⚠️", "#FFF8E1")
-    else:
-        gap_msg, gap_icon, gap_bg = ("현재 요금이 내 단계에 맞는 구간 안에 있습니다. 잘 하고 계세요!", "✅", "#E8F5E9")
-
-    st.markdown(
-        f'<div style="background:{gap_bg};border-left:4px solid {s_color};border-radius:10px;padding:16px 18px;">'
-        f'<div style="font-weight:700;color:{s_color};margin-bottom:6px;">{s_icon} {stage} 호스터 — 추천 요금 ₩{rec_min:,} ~ ₩{rec_max:,}</div>'
-        f'<div style="font-size:13px;color:#484848;">{gap_icon} {gap_msg}</div>'
-        f'<div style="font-size:12px;color:#767676;margin-top:6px;">💬 {s_tip}</div>'
-        f'<div style="font-size:11px;color:#AAAAAA;margin-top:8px;">'
-        f'본전 ₩{int(bep_adr):,} | 하위25% ₩{int(b_adr_p25):,} | 평균 ₩{int(b_adr):,} | 상위25% ₩{int(b_adr_p75):,}'
-        f'</div></div>',
-        unsafe_allow_html=True,
-    )
-
-    # ── C. 월 손익 계산서 ────────────────────────────────────────────────────
-    st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
-    section_title("💰 월 손익 계산서", "이번 달 예상 수익 구조입니다.")
-
-    col_pnl, col_pie = st.columns(2)
-    with col_pnl:
-        rows = [
-            ("월 매출", f"₩{int(monthly_revenue):,}", "#484848"),
-            ("에어비앤비 수수료 (3%)", f"- ₩{int(airbnb_fee):,}", "#C62828"),
-            ("월 운영비", f"- ₩{int(total_opex):,}", "#C62828"),
-        ]
-        html = '<div style="background:white;border-radius:12px;padding:20px;box-shadow:0 2px 10px rgba(0,0,0,0.06);">'
-        for label, value, color in rows:
-            html += (f'<div style="display:flex;justify-content:space-between;padding:9px 0;'
-                     f'border-bottom:1px solid #F5F5F5;">'
-                     f'<span style="color:#767676;font-size:14px;">{label}</span>'
-                     f'<span style="color:{color};font-weight:600;">{value}</span></div>')
-        pc2 = "#2E7D32" if net_profit >= 0 else "#C62828"
-        html += (f'<div style="display:flex;justify-content:space-between;padding:12px 0 0;">'
-                 f'<span style="font-weight:700;font-size:15px;">월 순이익</span>'
-                 f'<span style="font-weight:700;font-size:18px;color:{pc2};">₩{int(net_profit):,}</span></div>')
-        html += "</div>"
-        st.markdown(html, unsafe_allow_html=True)
-        if net_profit > 0:
-            st.success(f"✅ 월 ₩{int(net_profit):,} 흑자")
-        elif net_profit == 0:
-            st.warning("⚠️ 정확히 본전 상태")
-        else:
-            st.error(f"❌ 월 ₩{int(abs(net_profit)):,} 적자 — 요금 인상 또는 운영비 절감 필요")
-
-    with col_pie:
-        nonzero = {k: v for k, v in opex_items.items() if v > 0}
-        if nonzero and total_opex > 0:
-            fig, ax = plt.subplots(figsize=(4.5, 4))
-            colors = ["#FF5A5F","#FF8A8D","#FFB3B5","#00A699","#4DB6AC","#FFB400","#EBEBEB"]
-            ax.pie(nonzero.values(), labels=nonzero.keys(), autopct="%1.0f%%",
-                   startangle=90, colors=colors[:len(nonzero)],
-                   textprops={"fontsize": 10},
-                   wedgeprops={"linewidth": 1, "edgecolor": "white"})
-            ax.set_title(f"월 운영비 구성 (₩{total_opex:,})", fontsize=11)
-            fig.patch.set_facecolor("#FAFAFA")
-            fig.tight_layout()
-            st.pyplot(fig)
-            plt.close()
-        else:
-            st.info("운영비를 입력하면 구성 차트가 표시됩니다.")
-
-    # ── D. 주변 관광지 분석 ─────────────────────────────────────────────────
-    st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
-    section_title(
-        "📍 숙소 주변 관광지 분석",
-        f"위치: {my_loc_name or d_name} 기준 — 데이터베이스 내 2,965개 POI 기반",
-    )
-
-    if my_lat and my_lng:
-        with st.spinner("주변 관광지 분석 중..."):
-            nearby = find_nearby_pois(my_lat, my_lng, max_km=2.0)
-
-        cnt_500m = sum(1 for p in nearby if p["dist_m"] <= 500)
-        cnt_1km  = sum(1 for p in nearby if p["dist_m"] <= 1000)
-        cnt_2km  = len(nearby)
-
-        # 요약 수치
-        sc1, sc2, sc3 = st.columns(3)
-        def stat_box(col, label, value, sub, color="#FF5A5F"):
+        def kpi_card(col, label, value, sub, sub_color="#767676"):
             col.markdown(
                 f'<div style="background:white;border-radius:12px;padding:18px;text-align:center;'
                 f'box-shadow:0 2px 10px rgba(0,0,0,0.06);">'
-                f'<div style="font-size:12px;color:#888;margin-bottom:4px;">{label}</div>'
-                f'<div style="font-size:28px;font-weight:700;color:{color};">{value}</div>'
-                f'<div style="font-size:12px;color:#888;margin-top:4px;">{sub}</div>'
+                f'<div style="font-size:12px;color:#888;margin-bottom:6px;">{label}</div>'
+                f'<div style="font-size:22px;font-weight:700;color:#484848;">{value}</div>'
+                f'<div style="font-size:12px;color:{sub_color};margin-top:4px;">{sub}</div>'
                 f'</div>',
                 unsafe_allow_html=True,
             )
 
-        stat_box(sc1, "500m 이내 관광지", f"{cnt_500m}개", "도보 6분 거리")
-        stat_box(sc2, "1km 이내 관광지", f"{cnt_1km}개", "도보 12분 거리")
-        stat_box(sc3, "2km 이내 관광지", f"{cnt_2km}개", "전체 주변 반경")
+        kpi_card(k1, "하루 평균 실수익", f"₩{int(my_revpar):,}",
+                 f"{'▲' if revpar_diff>=0 else '▼'} 지역 평균 대비 ₩{int(abs(revpar_diff)):,}",
+                 "#2E7D32" if revpar_diff >= 0 else "#C62828")
+        kpi_card(k2, "월 예상 순이익", f"₩{int(net_profit):,}",
+                 "흑자 ✅" if net_profit > 0 else "적자 ❌", profit_color)
+        kpi_card(k3, "본전 요금", f"₩{int(bep_adr):,}",
+                 f"현재 요금 {'이상 ✅' if bep_ok else '이하 ❌'}",
+                 "#2E7D32" if bep_ok else "#C62828")
+
+        if host_type == "new":
+            st.info(f"💡 신규 호스터는 실제 예약 데이터가 없어 지역 평균 예약률({b_occ:.0%})로 계산했습니다.")
+
+        st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
+        section_title("💰 월 손익 계산서", "이번 달 예상 수익 구조입니다.")
+
+        col_pnl, col_pie = st.columns(2)
+        with col_pnl:
+            rows = [
+                ("월 매출", f"₩{int(monthly_revenue):,}", "#484848"),
+                ("에어비앤비 수수료 (3%)", f"- ₩{int(airbnb_fee):,}", "#C62828"),
+                ("월 운영비", f"- ₩{int(total_opex):,}", "#C62828"),
+            ]
+            html = '<div style="background:white;border-radius:12px;padding:20px;box-shadow:0 2px 10px rgba(0,0,0,0.06);">'
+            for label, value, color in rows:
+                html += (f'<div style="display:flex;justify-content:space-between;padding:9px 0;'
+                         f'border-bottom:1px solid #F5F5F5;">'
+                         f'<span style="color:#767676;font-size:14px;">{label}</span>'
+                         f'<span style="color:{color};font-weight:600;">{value}</span></div>')
+            pc2 = "#2E7D32" if net_profit >= 0 else "#C62828"
+            html += (f'<div style="display:flex;justify-content:space-between;padding:12px 0 0;">'
+                     f'<span style="font-weight:700;font-size:15px;">월 순이익</span>'
+                     f'<span style="font-weight:700;font-size:18px;color:{pc2};">₩{int(net_profit):,}</span></div>')
+            html += "</div>"
+            st.markdown(html, unsafe_allow_html=True)
+            if net_profit > 0:
+                st.success(f"✅ 월 ₩{int(net_profit):,} 흑자")
+            elif net_profit == 0:
+                st.warning("⚠️ 정확히 본전 상태")
+            else:
+                st.error(f"❌ 월 ₩{int(abs(net_profit)):,} 적자 — 요금 인상 또는 운영비 절감 필요")
+
+        with col_pie:
+            nonzero = {k: v for k, v in opex_items.items() if v > 0}
+            if nonzero and total_opex > 0:
+                fig, ax = plt.subplots(figsize=(4.5, 4))
+                colors = ["#FF5A5F","#FF8A8D","#FFB3B5","#00A699","#4DB6AC","#FFB400","#EBEBEB"]
+                ax.pie(nonzero.values(), labels=nonzero.keys(), autopct="%1.0f%%",
+                       startangle=90, colors=colors[:len(nonzero)],
+                       textprops={"fontsize": 10},
+                       wedgeprops={"linewidth": 1, "edgecolor": "white"})
+                ax.set_title(f"월 운영비 구성 (₩{total_opex:,})", fontsize=11)
+                fig.patch.set_facecolor("#FAFAFA")
+                fig.tight_layout()
+                st.pyplot(fig)
+                plt.close()
+            else:
+                st.info("운영비를 입력하면 구성 차트가 표시됩니다.")
+
+    # ── TAB 2: 요금 전략 ─────────────────────────────────────────────────────
+    with tab2:
+        section_title("💡 내 숙소에 맞는 적정 요금")
+
+        if my_superhost and my_rating >= 4.8 and my_reviews >= 50:
+            stage, s_color, s_icon = "프리미엄", "#FF5A5F", "🏆"
+            rec_min, rec_max = int(b_adr), int(b_adr_p75)
+            s_tip = "현재 요금이 지역 평균보다 낮다면 10~20% 인상을 테스트해보세요."
+        elif my_reviews >= 10 and my_rating >= 4.5:
+            stage, s_color, s_icon = "안정", "#00A699", "📈"
+            rec_min, rec_max = int(b_adr_p25), int(b_adr)
+            s_tip = "슈퍼호스트 달성 후 요금을 지역 평균 이상으로 올릴 수 있습니다."
+        else:
+            stage, s_color, s_icon = "신규", "#2196F3", "🌱"
+            rec_min = max(int(bep_adr), int(b_adr_p25 * 0.85))
+            rec_max = int(b_adr_p25)
+            s_tip = "하위 25% 요금으로 첫 10건의 리뷰를 빠르게 쌓은 후 요금을 올리세요."
+
+        t1, t2, t3 = st.columns(3)
+        stage_data = [
+            ("신규", "🌱", "#2196F3", f"₩{int(b_adr_p25*0.85):,} ~ ₩{int(b_adr_p25):,}", "리뷰 10건 미만"),
+            ("안정", "📈", "#00A699", f"₩{int(b_adr_p25):,} ~ ₩{int(b_adr):,}", "리뷰 10건+ & 평점 4.5+"),
+            ("프리미엄", "🏆", "#FF5A5F", f"₩{int(b_adr):,} ~ ₩{int(b_adr_p75):,}", "슈퍼호스트 & 평점 4.8+"),
+        ]
+        for col, (sname, sicon, scolor, sprice, scond) in zip([t1, t2, t3], stage_data):
+            is_me = sname == stage
+            bg    = scolor if is_me else "#F7F7F7"
+            fc    = "white" if is_me else "#767676"
+            border = f"3px solid {scolor}" if is_me else "2px solid #EBEBEB"
+            me_tag = (f'<div style="margin-top:8px;"><span style="background:white;color:{scolor};'
+                      f'padding:2px 10px;border-radius:20px;font-size:11px;font-weight:700;">▲ 내 단계</span></div>'
+                      if is_me else "")
+            col.markdown(
+                f'<div style="border:{border};border-radius:12px;padding:18px;text-align:center;background:{bg};color:{fc};">'
+                f'<div style="font-size:22px;">{sicon}</div>'
+                f'<div style="font-weight:700;font-size:14px;margin:6px 0;">{sname} 호스트</div>'
+                f'<div style="font-size:11px;opacity:0.85;margin-bottom:8px;">{scond}</div>'
+                f'<div style="font-size:15px;font-weight:700;">{sprice}</div>'
+                f'{me_tag}</div>',
+                unsafe_allow_html=True,
+            )
 
         st.markdown("<br>", unsafe_allow_html=True)
+        if my_adr < rec_min:
+            gap_msg, gap_icon, gap_bg = (f"현재 요금 ₩{int(my_adr):,}이 추천 구간보다 ₩{rec_min - int(my_adr):,} 낮습니다.", "⬆️", "#E3F2FD")
+        elif my_adr > rec_max:
+            gap_msg, gap_icon, gap_bg = (f"현재 요금 ₩{int(my_adr):,}이 추천 구간보다 ₩{int(my_adr) - rec_max:,} 높습니다.", "⚠️", "#FFF8E1")
+        else:
+            gap_msg, gap_icon, gap_bg = ("현재 요금이 내 단계에 맞는 구간 안에 있습니다. 잘 하고 계세요!", "✅", "#E8F5E9")
 
-        # 가장 가까운 POI 5개
         st.markdown(
-            '<div style="font-weight:700;font-size:15px;color:#484848;margin-bottom:10px;">'
-            '🗺️ 가장 가까운 관광지 TOP 5</div>',
+            f'<div style="background:{gap_bg};border-left:4px solid {s_color};border-radius:10px;padding:16px 18px;">'
+            f'<div style="font-weight:700;color:{s_color};margin-bottom:6px;">{s_icon} {stage} 호스터 — 추천 요금 ₩{rec_min:,} ~ ₩{rec_max:,}</div>'
+            f'<div style="font-size:13px;color:#484848;">{gap_icon} {gap_msg}</div>'
+            f'<div style="font-size:12px;color:#767676;margin-top:6px;">💬 {s_tip}</div>'
+            f'<div style="font-size:11px;color:#AAAAAA;margin-top:8px;">'
+            f'본전 ₩{int(bep_adr):,} | 하위25% ₩{int(b_adr_p25):,} | 평균 ₩{int(b_adr):,} | 상위25% ₩{int(b_adr_p75):,}'
+            f'</div></div>',
             unsafe_allow_html=True,
         )
-        if nearby:
-            for i, poi in enumerate(nearby[:5], 1):
-                icon = POI_TYPE_ICON.get(poi["type"], "📌")
-                dist_txt = f"{poi['dist_m']}m" if poi["dist_m"] < 1000 else f"{poi['dist_km']:.2f}km"
-                type_color = {
-                    "관광지": "#FF5A5F", "문화시설": "#9C27B0", "음식점": "#FF9800",
-                    "쇼핑": "#2196F3", "숙박": "#00A699", "레포츠": "#4CAF50",
-                    "여행코스": "#795548", "축제공연행사": "#E91E63",
-                }.get(poi["type"], "#888")
-                st.markdown(
-                    f'<div style="background:white;border:1.5px solid #EBEBEB;border-radius:10px;'
-                    f'padding:12px 16px;margin-bottom:8px;display:flex;align-items:center;gap:14px;">'
-                    f'<div style="background:#FF5A5F;color:white;border-radius:50%;min-width:28px;height:28px;'
-                    f'display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;">{i}</div>'
-                    f'<div style="flex:1;">'
-                    f'<div style="font-weight:600;font-size:14px;">{icon} {poi["name"]}</div>'
-                    f'<div style="font-size:12px;color:#888;margin-top:2px;">{poi.get("addr","")}</div>'
-                    f'</div>'
-                    f'<div style="text-align:right;min-width:80px;">'
-                    f'<span style="background:{type_color}20;color:{type_color};font-size:11px;'
-                    f'font-weight:600;padding:2px 8px;border-radius:20px;">{poi["type"]}</span><br>'
-                    f'<span style="font-size:13px;font-weight:700;color:#484848;margin-top:4px;">{dist_txt}</span>'
-                    f'</div>'
+
+        # F. 요금 시뮬레이션 (기존 호스터 전용)
+        if host_type == "existing":
+            st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
+            section_title(
+                "📊 요금 변경 시뮬레이션",
+                f"이 지역({cluster_name})은 요금을 10% 올리면 예약률이 약 {abs(elasticity)*10:.0f}% 변화합니다.",
+            )
+
+            delta_pct = st.slider("요금 변화율 (%)", -30, 50, 0, 5)
+            delta     = delta_pct / 100
+            new_adr   = my_adr * (1 + delta)
+            new_occ   = min(1.0, max(0.0, my_occ * (1 + elasticity * delta)))
+            new_revp  = new_adr * new_occ
+            new_net   = new_revp * 30 * 0.97 - total_opex
+            p_change  = new_net - net_profit
+
+            cs1, cs2 = st.columns(2)
+            with cs1:
+                sim_rows = [
+                    ("1박 요금", f"₩{int(my_adr):,}", f"₩{int(new_adr):,}", f"{delta_pct:+d}%"),
+                    ("예약률", f"{my_occ:.0%}", f"{new_occ:.0%}", f"{(new_occ-my_occ)*100:+.1f}%p"),
+                    ("하루 실수익", f"₩{int(my_revpar):,}", f"₩{int(new_revp):,}",
+                     f"{(new_revp/my_revpar-1)*100:+.1f}%" if my_revpar > 0 else "-"),
+                    ("월 순이익", f"₩{int(net_profit):,}", f"₩{int(new_net):,}", f"₩{p_change:+,.0f}"),
+                ]
+                html = ('<div style="background:white;border-radius:12px;padding:20px;'
+                        'box-shadow:0 2px 10px rgba(0,0,0,0.06);">'
+                        '<div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;'
+                        'color:#888;font-size:12px;font-weight:600;padding-bottom:8px;'
+                        'border-bottom:1.5px solid #F0F0F0;margin-bottom:4px;">'
+                        '<span>항목</span><span style="text-align:right;">현재</span>'
+                        '<span style="text-align:right;">변경 후</span>'
+                        '<span style="text-align:right;">변화</span></div>')
+                for label, cur, nxt, chg in sim_rows:
+                    w = "700" if "순이익" in label else "400"
+                    chg_c = "#2E7D32" if ("+" in chg and "₩-" not in chg) else "#C62828" if ("-" in chg and "₩+" not in chg) else "#484848"
+                    html += (f'<div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;'
+                             f'padding:9px 0;border-bottom:1px solid #F5F5F5;font-weight:{w};">'
+                             f'<span style="font-size:13px;">{label}</span>'
+                             f'<span style="text-align:right;font-size:13px;">{cur}</span>'
+                             f'<span style="text-align:right;font-size:13px;">{nxt}</span>'
+                             f'<span style="text-align:right;font-size:13px;color:{chg_c};">{chg}</span></div>')
+                html += "</div>"
+                st.markdown(html, unsafe_allow_html=True)
+
+                if delta_pct == 0:
+                    st.info("슬라이더를 움직여 요금 변화 효과를 확인하세요.")
+                elif delta_pct > 0 and p_change > 0:
+                    st.success(f"✅ 요금 인상 효과 — 순이익 ₩{p_change:+,.0f} 증가")
+                elif delta_pct > 0:
+                    st.error(f"❌ 요금 인상 역효과 — 순이익 ₩{abs(p_change):,.0f} 감소")
+                elif p_change > 0:
+                    st.success(f"✅ 요금 인하로 예약률 상승 → 순이익 ₩{p_change:+,.0f} 증가")
+                else:
+                    st.warning(f"⚠️ 요금 인하 시 순이익 ₩{abs(p_change):,.0f} 감소")
+
+            with cs2:
+                x_range = np.linspace(-0.30, 0.50, 80)
+                profits = [
+                    my_adr*(1+d) * min(1., max(0., my_occ*(1+elasticity*d))) * 30 * 0.97 - total_opex
+                    for d in x_range
+                ]
+                fig4, ax4 = plt.subplots(figsize=(5, 3.8))
+                ax4.plot(x_range*100, profits, color="#FF5A5F", linewidth=2.5)
+                ax4.axhline(0, color="#767676", linestyle="--", lw=1.2, alpha=0.6, label="손익분기선")
+                ax4.axvline(delta_pct, color="#FFB400", linestyle="--", lw=1.5, label=f"현재 ({delta_pct:+d}%)")
+                ax4.scatter([delta_pct], [new_net], color="#FFB400", s=70, zorder=6)
+                ax4.fill_between(x_range*100, profits, 0, where=[p > 0 for p in profits], alpha=0.07, color="#4CAF50")
+                ax4.fill_between(x_range*100, profits, 0, where=[p <= 0 for p in profits], alpha=0.07, color="#FF5A5F")
+                ax4.set_xlabel("요금 변화율 (%)"); ax4.set_ylabel("월 순이익 (원)")
+                ax4.yaxis.set_major_formatter(plt.FuncFormatter(lambda y, _: f"₩{y/10000:.0f}만"))
+                ax4.legend(fontsize=8)
+                ax4.spines["top"].set_visible(False); ax4.spines["right"].set_visible(False)
+                ax4.set_facecolor("#FAFAFA"); fig4.patch.set_facecolor("#FAFAFA")
+                fig4.tight_layout()
+                st.pyplot(fig4); plt.close()
+                best_idx  = int(np.argmax(profits))
+                best_adr  = my_adr * (1 + x_range[best_idx])
+                best_prof = profits[best_idx]
+                st.success(f"🎯 최대 순이익: ₩{int(best_adr):,} ({x_range[best_idx]*100:+.0f}%) → 월 ₩{int(best_prof):,}")
+
+    # ── TAB 3: 주변 관광지 ────────────────────────────────────────────────────
+    with tab3:
+        section_title(
+            "📍 숙소 주변 관광지 분석",
+            f"위치: {my_loc_name or d_name} 기준 — 데이터베이스 내 2,965개 POI 기반",
+        )
+
+        if my_lat and my_lng:
+            with st.spinner("주변 관광지 분석 중..."):
+                nearby = find_nearby_pois(my_lat, my_lng, max_km=2.0)
+
+            cnt_500m = sum(1 for p in nearby if p["dist_m"] <= 500)
+            cnt_1km  = sum(1 for p in nearby if p["dist_m"] <= 1000)
+            cnt_2km  = len(nearby)
+
+            sc1, sc2, sc3 = st.columns(3)
+            def stat_box(col, label, value, sub, color="#FF5A5F"):
+                col.markdown(
+                    f'<div style="background:white;border-radius:12px;padding:18px;text-align:center;'
+                    f'box-shadow:0 2px 10px rgba(0,0,0,0.06);">'
+                    f'<div style="font-size:12px;color:#888;margin-bottom:4px;">{label}</div>'
+                    f'<div style="font-size:28px;font-weight:700;color:{color};">{value}</div>'
+                    f'<div style="font-size:12px;color:#888;margin-top:4px;">{sub}</div>'
                     f'</div>',
                     unsafe_allow_html=True,
                 )
-        else:
-            st.info("데이터베이스에서 2km 이내 관광지를 찾지 못했습니다.")
 
-        # 유형별 분포
-        if nearby:
+            stat_box(sc1, "500m 이내 관광지", f"{cnt_500m}개", "도보 6분 거리")
+            stat_box(sc2, "1km 이내 관광지", f"{cnt_1km}개", "도보 12분 거리")
+            stat_box(sc3, "2km 이내 관광지", f"{cnt_2km}개", "전체 주변 반경")
+
+            st.markdown("<br>", unsafe_allow_html=True)
+
             st.markdown(
-                '<div style="font-weight:700;font-size:15px;color:#484848;margin:16px 0 10px;">'
-                '📊 1km 이내 관광지 유형 분포</div>',
+                '<div style="font-weight:700;font-size:15px;color:#484848;margin-bottom:10px;">'
+                '🗺️ 가장 가까운 관광지 TOP 5</div>',
                 unsafe_allow_html=True,
             )
-            nearby_1km = [p for p in nearby if p["dist_m"] <= 1000]
-            if nearby_1km:
-                type_counts = {}
-                for p in nearby_1km:
-                    t = p["type"]
-                    type_counts[t] = type_counts.get(t, 0) + 1
-                type_counts = dict(sorted(type_counts.items(), key=lambda x: x[1], reverse=True))
-
-                bar_html = '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;">'
-                for t, cnt in type_counts.items():
-                    icon = POI_TYPE_ICON.get(t, "📌")
-                    color = {
+            if nearby:
+                for i, poi in enumerate(nearby[:5], 1):
+                    icon = POI_TYPE_ICON.get(poi["type"], "📌")
+                    dist_txt = f"{poi['dist_m']}m" if poi["dist_m"] < 1000 else f"{poi['dist_km']:.2f}km"
+                    type_color = {
                         "관광지": "#FF5A5F", "문화시설": "#9C27B0", "음식점": "#FF9800",
                         "쇼핑": "#2196F3", "숙박": "#00A699", "레포츠": "#4CAF50",
                         "여행코스": "#795548", "축제공연행사": "#E91E63",
-                    }.get(t, "#888")
-                    bar_html += (
-                        f'<div style="background:{color}15;border:1.5px solid {color};'
-                        f'border-radius:20px;padding:6px 14px;font-size:13px;">'
-                        f'{icon} {t} <b style="color:{color};">{cnt}개</b></div>'
+                    }.get(poi["type"], "#888")
+                    st.markdown(
+                        f'<div style="background:white;border:1.5px solid #EBEBEB;border-radius:10px;'
+                        f'padding:12px 16px;margin-bottom:8px;display:flex;align-items:center;gap:14px;">'
+                        f'<div style="background:#FF5A5F;color:white;border-radius:50%;min-width:28px;height:28px;'
+                        f'display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;">{i}</div>'
+                        f'<div style="flex:1;">'
+                        f'<div style="font-weight:600;font-size:14px;">{icon} {poi["name"]}</div>'
+                        f'<div style="font-size:12px;color:#888;margin-top:2px;">{poi.get("addr","")}</div>'
+                        f'</div>'
+                        f'<div style="text-align:right;min-width:80px;">'
+                        f'<span style="background:{type_color}20;color:{type_color};font-size:11px;'
+                        f'font-weight:600;padding:2px 8px;border-radius:20px;">{poi["type"]}</span><br>'
+                        f'<span style="font-size:13px;font-weight:700;color:#484848;margin-top:4px;">{dist_txt}</span>'
+                        f'</div>'
+                        f'</div>',
+                        unsafe_allow_html=True,
                     )
-                bar_html += "</div>"
-                st.markdown(bar_html, unsafe_allow_html=True)
+            else:
+                st.info("데이터베이스에서 2km 이내 관광지를 찾지 못했습니다.")
 
-                # 지역 평균과 비교
-                bench_500m = bench_val(bench, "nearest_500m", 19)
-                bench_1km  = bench_val(bench, "nearest_1km", 79)
+            if nearby:
                 st.markdown(
-                    f'<div style="background:#F7F7F7;border-radius:10px;padding:12px 16px;">'
-                    f'<span style="font-size:13px;color:#484848;">'
-                    f'<b>지역 평균 비교</b> — {d_name} {rt_name} 실운영 숙소 기준<br>'
-                    f'500m 이내: 평균 <b>{int(bench_500m)}개</b> vs 내 숙소 <b style="color:{"#2E7D32" if cnt_500m>=bench_500m else "#C62828"};">{cnt_500m}개</b>'
-                    f' &nbsp;|&nbsp; '
-                    f'1km 이내: 평균 <b>{int(bench_1km)}개</b> vs 내 숙소 <b style="color:{"#2E7D32" if cnt_1km>=bench_1km else "#C62828"};">{cnt_1km}개</b>'
-                    f'</span></div>',
+                    '<div style="font-weight:700;font-size:15px;color:#484848;margin:16px 0 10px;">'
+                    '📊 1km 이내 관광지 유형 분포</div>',
                     unsafe_allow_html=True,
                 )
+                nearby_1km = [p for p in nearby if p["dist_m"] <= 1000]
+                if nearby_1km:
+                    type_counts = {}
+                    for p in nearby_1km:
+                        t = p["type"]
+                        type_counts[t] = type_counts.get(t, 0) + 1
+                    type_counts = dict(sorted(type_counts.items(), key=lambda x: x[1], reverse=True))
+
+                    bar_html = '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;">'
+                    for t, cnt in type_counts.items():
+                        icon = POI_TYPE_ICON.get(t, "📌")
+                        color = {
+                            "관광지": "#FF5A5F", "문화시설": "#9C27B0", "음식점": "#FF9800",
+                            "쇼핑": "#2196F3", "숙박": "#00A699", "레포츠": "#4CAF50",
+                            "여행코스": "#795548", "축제공연행사": "#E91E63",
+                        }.get(t, "#888")
+                        bar_html += (
+                            f'<div style="background:{color}15;border:1.5px solid {color};'
+                            f'border-radius:20px;padding:6px 14px;font-size:13px;">'
+                            f'{icon} {t} <b style="color:{color};">{cnt}개</b></div>'
+                        )
+                    bar_html += "</div>"
+                    st.markdown(bar_html, unsafe_allow_html=True)
+
+                    bench_500m = bench_val(bench, "nearest_500m", 19)
+                    bench_1km  = bench_val(bench, "nearest_1km", 79)
+                    st.markdown(
+                        f'<div style="background:#F7F7F7;border-radius:10px;padding:12px 16px;">'
+                        f'<span style="font-size:13px;color:#484848;">'
+                        f'<b>지역 평균 비교</b> — {d_name} {rt_name} 실운영 숙소 기준<br>'
+                        f'500m 이내: 평균 <b>{int(bench_500m)}개</b> vs 내 숙소 <b style="color:{"#2E7D32" if cnt_500m>=bench_500m else "#C62828"};">{cnt_500m}개</b>'
+                        f' &nbsp;|&nbsp; '
+                        f'1km 이내: 평균 <b>{int(bench_1km)}개</b> vs 내 숙소 <b style="color:{"#2E7D32" if cnt_1km>=bench_1km else "#C62828"};">{cnt_1km}개</b>'
+                        f'</span></div>',
+                        unsafe_allow_html=True,
+                    )
+                else:
+                    st.info("1km 이내 관광지가 없습니다. 관광지 접근성이 낮은 지역에 위치해 있습니다.")
+        else:
+            st.info("주소를 입력하면 주변 관광지 분석 결과가 여기에 표시됩니다.")
+
+    # ── TAB 4: 운영 개선(기존) / 지역진단(신규) ──────────────────────────────
+    def _render_market_tab(tab_obj):
+        with tab_obj:
+            section_title(
+                f"{c_info['emoji']} {d_name} 시장 유형: {cluster_name}",
+                c_info["desc"],
+            )
+            col_m1, col_m2 = st.columns([1, 1.4])
+            with col_m1:
+                st.markdown(
+                    f'<div style="background:{c_info["color"]}15;border:2px solid {c_info["color"]};'
+                    f'border-radius:12px;padding:20px;">'
+                    f'<div style="font-size:34px;">{c_info["emoji"]}</div>'
+                    f'<div style="font-weight:700;font-size:15px;color:{c_info["color"]};margin:8px 0;">{cluster_name}</div>'
+                    f'<div style="font-size:13px;color:#484848;">{c_info["desc"]}</div>'
+                    f'</div>',
+                    unsafe_allow_html=True,
+                )
+                if len(d_row) > 0:
+                    row = d_row.iloc[0]
+                    info_row("지역 평균 하루 수익", f"₩{int(row.get('median_revpar_ao', 0)):,}")
+                    info_row("비활성 숙소 비율", f"{row.get('dormant_ratio', 0):.1%}")
+                    info_row("슈퍼호스트 비율", f"{row.get('superhost_rate', 0):.1%}")
+            with col_m2:
+                st.markdown("**이 지역에서 수익을 올리는 전략:**")
+                for i, strat in enumerate(c_info["strategy"], 1):
+                    st.markdown(
+                        f'<div style="background:white;border:1.5px solid #EBEBEB;border-radius:8px;'
+                        f'padding:10px 14px;margin-bottom:6px;">'
+                        f'<span style="background:#FF5A5F;color:white;border-radius:50%;padding:1px 7px;'
+                        f'font-size:11px;font-weight:700;margin-right:8px;">{i}</span>'
+                        f'<span style="font-size:14px;">{strat}</span>'
+                        f'</div>',
+                        unsafe_allow_html=True,
+                    )
+
+    if host_type == "existing":
+        with tab4:
+            section_title("📋 지금 바로 개선할 수 있는 것들")
+
+            checks = []
+            if my_superhost:
+                checks.append(("✅", "슈퍼호스트 달성", "수익 +83% 프리미엄 유지 중", "done"))
             else:
-                st.info("1km 이내 관광지가 없습니다. 관광지 접근성이 낮은 지역에 위치해 있습니다.")
+                est = my_revpar * 1.831
+                checks.append(("🔴", "슈퍼호스트 미달성",
+                    f"달성 시 하루 수익 ₩{int(my_revpar):,} → ₩{int(est):,} 잠재", "todo"))
+            if my_instant:
+                checks.append(("✅", "즉시예약 켜짐", "예약률 최대화 중", "done"))
+            else:
+                checks.append(("🟡", "즉시예약 꺼짐", "설정 1분, 비용 없음 → 예약률 +5~10% 기대", "quick"))
+            if 20 <= my_photos <= 35:
+                checks.append(("✅", f"사진 {my_photos}장 (최적)", "최적 20~35장 구간 유지 중", "done"))
+            elif my_photos < 20:
+                checks.append(("🔴", f"사진 {my_photos}장 (부족)", f"{20-my_photos}장 추가 → 클릭률 상승", "todo"))
+            else:
+                checks.append(("🟡", f"사진 {my_photos}장 (많음)", "35장 초과 — 좋은 사진만 추려서 정리 권장", "quick"))
+            if not my_extra_fee:
+                checks.append(("✅", "추가 게스트 요금 없음", "요금에 포함 — 최적 구조", "done"))
+            else:
+                checks.append(("🔴", "추가 게스트 요금 있음", "없애고 1박 요금에 통합 → 수익 +25~56% 회복", "quick"))
+            if 2 <= my_min_nights <= 3:
+                checks.append(("✅", f"최소 {my_min_nights}박 (최적)", "수익 최적 + 리뷰 축적 속도 최적", "done"))
+            elif my_min_nights == 1:
+                checks.append(("🟡", "최소 1박", "수익 효율 낮음 — 2박으로 변경 추천", "quick"))
+            else:
+                checks.append(("🟡", f"최소 {my_min_nights}박 (길음)", "리뷰 축적 속도 느림 — 2~3박으로 줄이기", "quick"))
+            if my_rating >= 4.8:
+                checks.append(("✅", f"평점 {my_rating:.1f}", "슈퍼호스트 기준 충족 + 검색 상위", "done"))
+            elif my_rating >= 4.5:
+                checks.append(("🟡", f"평점 {my_rating:.1f}", "4.8 이상이면 슈퍼호스트 + 검색 부스트", "todo"))
+            else:
+                checks.append(("🔴", f"평점 {my_rating:.1f} (낮음)", "4.5 미만 — 검색 노출 불이익", "todo"))
+            if my_reviews >= 10:
+                checks.append(("✅", f"리뷰 {my_reviews}건", "슈퍼호스트 최소 요건 충족", "done"))
+            else:
+                checks.append(("🔴", f"리뷰 {my_reviews}건",
+                    f"슈퍼호스트 최소 10건 필요 — {10-my_reviews}건 더 필요", "todo"))
+
+            col_c1, col_c2 = st.columns(2)
+            for i, (icon, title, desc, status) in enumerate(checks):
+                col = col_c1 if i % 2 == 0 else col_c2
+                bg_c     = "#F1F8F4" if status=="done" else "#FFF8E1" if status=="quick" else "#FFF0EE"
+                border_c = "#4CAF50" if status=="done" else "#FFB400" if status=="quick" else "#FF5A5F"
+                col.markdown(
+                    f'<div style="background:{bg_c};border-left:3px solid {border_c};border-radius:8px;'
+                    f'padding:12px 14px;margin-bottom:8px;">'
+                    f'<span style="font-weight:600;font-size:14px;">{icon} {title}</span><br>'
+                    f'<span style="font-size:12px;color:#767676;">{desc}</span></div>',
+                    unsafe_allow_html=True,
+                )
+
+            quick_list = [(icon, title, desc) for icon, title, desc, status in checks if status in ("quick","todo")]
+            if quick_list:
+                st.markdown("#### 🎯 지금 당장 실행하면 효과 큰 TOP 3")
+                for i, (icon, title, desc) in enumerate(quick_list[:3], 1):
+                    st.markdown(
+                        f'<div style="background:white;border:1.5px solid #FFE0DE;border-radius:10px;'
+                        f'padding:14px 16px;margin-bottom:8px;display:flex;align-items:flex-start;">'
+                        f'<span style="background:#FF5A5F;color:white;border-radius:50%;min-width:24px;height:24px;'
+                        f'display:flex;align-items:center;justify-content:center;font-size:12px;'
+                        f'font-weight:700;margin-right:12px;">{i}</span>'
+                        f'<div><b style="font-size:14px;">{title}</b><br>'
+                        f'<span style="font-size:12px;color:#767676;">{desc}</span></div></div>',
+                        unsafe_allow_html=True,
+                    )
+            else:
+                st.success("🎉 모든 운영 레버가 최적 상태입니다!")
+
+        _render_market_tab(tab5)
     else:
-        st.info("주소를 입력하면 주변 관광지 분석 결과가 여기에 표시됩니다.")
-
-    # ── E. 운영 체크리스트 (기존 호스터 전용) ────────────────────────────────
-    if host_type == "existing":
-        st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
-        section_title("📋 지금 바로 개선할 수 있는 것들")
-
-        checks = []
-        if my_superhost:
-            checks.append(("✅", "슈퍼호스트 달성", "수익 +83% 프리미엄 유지 중", "done"))
-        else:
-            est = my_revpar * 1.831
-            checks.append(("🔴", "슈퍼호스트 미달성",
-                f"달성 시 하루 수익 ₩{int(my_revpar):,} → ₩{int(est):,} 잠재", "todo"))
-        if my_instant:
-            checks.append(("✅", "즉시예약 켜짐", "예약률 최대화 중", "done"))
-        else:
-            checks.append(("🟡", "즉시예약 꺼짐", "설정 1분, 비용 없음 → 예약률 +5~10% 기대", "quick"))
-        if 20 <= my_photos <= 35:
-            checks.append(("✅", f"사진 {my_photos}장 (최적)", "최적 20~35장 구간 유지 중", "done"))
-        elif my_photos < 20:
-            checks.append(("🔴", f"사진 {my_photos}장 (부족)", f"{20-my_photos}장 추가 → 클릭률 상승", "todo"))
-        else:
-            checks.append(("🟡", f"사진 {my_photos}장 (많음)", "35장 초과 — 좋은 사진만 추려서 정리 권장", "quick"))
-        if not my_extra_fee:
-            checks.append(("✅", "추가 게스트 요금 없음", "요금에 포함 — 최적 구조", "done"))
-        else:
-            checks.append(("🔴", "추가 게스트 요금 있음", "없애고 1박 요금에 통합 → 수익 +25~56% 회복", "quick"))
-        if 2 <= my_min_nights <= 3:
-            checks.append(("✅", f"최소 {my_min_nights}박 (최적)", "수익 최적 + 리뷰 축적 속도 최적", "done"))
-        elif my_min_nights == 1:
-            checks.append(("🟡", "최소 1박", "수익 효율 낮음 — 2박으로 변경 추천", "quick"))
-        else:
-            checks.append(("🟡", f"최소 {my_min_nights}박 (길음)", "리뷰 축적 속도 느림 — 2~3박으로 줄이기", "quick"))
-        if my_rating >= 4.8:
-            checks.append(("✅", f"평점 {my_rating:.1f}", "슈퍼호스트 기준 충족 + 검색 상위", "done"))
-        elif my_rating >= 4.5:
-            checks.append(("🟡", f"평점 {my_rating:.1f}", "4.8 이상이면 슈퍼호스트 + 검색 부스트", "todo"))
-        else:
-            checks.append(("🔴", f"평점 {my_rating:.1f} (낮음)", "4.5 미만 — 검색 노출 불이익", "todo"))
-        if my_reviews >= 10:
-            checks.append(("✅", f"리뷰 {my_reviews}건", "슈퍼호스트 최소 요건 충족", "done"))
-        else:
-            checks.append(("🔴", f"리뷰 {my_reviews}건",
-                f"슈퍼호스트 최소 10건 필요 — {10-my_reviews}건 더 필요", "todo"))
-
-        col_c1, col_c2 = st.columns(2)
-        for i, (icon, title, desc, status) in enumerate(checks):
-            col = col_c1 if i % 2 == 0 else col_c2
-            bg_c     = "#F1F8F4" if status=="done" else "#FFF8E1" if status=="quick" else "#FFF0EE"
-            border_c = "#4CAF50" if status=="done" else "#FFB400" if status=="quick" else "#FF5A5F"
-            col.markdown(
-                f'<div style="background:{bg_c};border-left:3px solid {border_c};border-radius:8px;'
-                f'padding:12px 14px;margin-bottom:8px;">'
-                f'<span style="font-weight:600;font-size:14px;">{icon} {title}</span><br>'
-                f'<span style="font-size:12px;color:#767676;">{desc}</span></div>',
-                unsafe_allow_html=True,
-            )
-
-        quick_list = [(icon, title, desc) for icon, title, desc, status in checks if status in ("quick","todo")]
-        if quick_list:
-            st.markdown("#### 🎯 지금 당장 실행하면 효과 큰 TOP 3")
-            for i, (icon, title, desc) in enumerate(quick_list[:3], 1):
-                st.markdown(
-                    f'<div style="background:white;border:1.5px solid #FFE0DE;border-radius:10px;'
-                    f'padding:14px 16px;margin-bottom:8px;display:flex;align-items:flex-start;">'
-                    f'<span style="background:#FF5A5F;color:white;border-radius:50%;min-width:24px;height:24px;'
-                    f'display:flex;align-items:center;justify-content:center;font-size:12px;'
-                    f'font-weight:700;margin-right:12px;">{i}</span>'
-                    f'<div><b style="font-size:14px;">{title}</b><br>'
-                    f'<span style="font-size:12px;color:#767676;">{desc}</span></div></div>',
-                    unsafe_allow_html=True,
-                )
-        else:
-            st.success("🎉 모든 운영 레버가 최적 상태입니다!")
-
-    # ── F. 요금 시뮬레이션 (기존 호스터 전용) ────────────────────────────────
-    if host_type == "existing":
-        st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
-        section_title(
-            "📊 요금 변경 시뮬레이션",
-            f"이 지역({cluster_name})은 요금을 10% 올리면 예약률이 약 {abs(elasticity)*10:.0f}% 변화합니다.",
-        )
-
-        delta_pct = st.slider("요금 변화율 (%)", -30, 50, 0, 5)
-        delta     = delta_pct / 100
-        new_adr   = my_adr * (1 + delta)
-        new_occ   = min(1.0, max(0.0, my_occ * (1 + elasticity * delta)))
-        new_revp  = new_adr * new_occ
-        new_net   = new_revp * 30 * 0.97 - total_opex
-        p_change  = new_net - net_profit
-
-        cs1, cs2 = st.columns(2)
-        with cs1:
-            sim_rows = [
-                ("1박 요금", f"₩{int(my_adr):,}", f"₩{int(new_adr):,}", f"{delta_pct:+d}%"),
-                ("예약률", f"{my_occ:.0%}", f"{new_occ:.0%}", f"{(new_occ-my_occ)*100:+.1f}%p"),
-                ("하루 실수익", f"₩{int(my_revpar):,}", f"₩{int(new_revp):,}",
-                 f"{(new_revp/my_revpar-1)*100:+.1f}%" if my_revpar > 0 else "-"),
-                ("월 순이익", f"₩{int(net_profit):,}", f"₩{int(new_net):,}", f"₩{p_change:+,.0f}"),
-            ]
-            html = ('<div style="background:white;border-radius:12px;padding:20px;'
-                    'box-shadow:0 2px 10px rgba(0,0,0,0.06);">'
-                    '<div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;'
-                    'color:#888;font-size:12px;font-weight:600;padding-bottom:8px;'
-                    'border-bottom:1.5px solid #F0F0F0;margin-bottom:4px;">'
-                    '<span>항목</span><span style="text-align:right;">현재</span>'
-                    '<span style="text-align:right;">변경 후</span>'
-                    '<span style="text-align:right;">변화</span></div>')
-            for label, cur, nxt, chg in sim_rows:
-                w = "700" if "순이익" in label else "400"
-                chg_c = "#2E7D32" if ("+" in chg and "₩-" not in chg) else "#C62828" if ("-" in chg and "₩+" not in chg) else "#484848"
-                html += (f'<div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;'
-                         f'padding:9px 0;border-bottom:1px solid #F5F5F5;font-weight:{w};">'
-                         f'<span style="font-size:13px;">{label}</span>'
-                         f'<span style="text-align:right;font-size:13px;">{cur}</span>'
-                         f'<span style="text-align:right;font-size:13px;">{nxt}</span>'
-                         f'<span style="text-align:right;font-size:13px;color:{chg_c};">{chg}</span></div>')
-            html += "</div>"
-            st.markdown(html, unsafe_allow_html=True)
-
-            if delta_pct == 0:
-                st.info("슬라이더를 움직여 요금 변화 효과를 확인하세요.")
-            elif delta_pct > 0 and p_change > 0:
-                st.success(f"✅ 요금 인상 효과 — 순이익 ₩{p_change:+,.0f} 증가")
-            elif delta_pct > 0:
-                st.error(f"❌ 요금 인상 역효과 — 순이익 ₩{abs(p_change):,.0f} 감소")
-            elif p_change > 0:
-                st.success(f"✅ 요금 인하로 예약률 상승 → 순이익 ₩{p_change:+,.0f} 증가")
-            else:
-                st.warning(f"⚠️ 요금 인하 시 순이익 ₩{abs(p_change):,.0f} 감소")
-
-        with cs2:
-            x_range = np.linspace(-0.30, 0.50, 80)
-            profits = [
-                my_adr*(1+d) * min(1., max(0., my_occ*(1+elasticity*d))) * 30 * 0.97 - total_opex
-                for d in x_range
-            ]
-            fig4, ax4 = plt.subplots(figsize=(5, 3.8))
-            ax4.plot(x_range*100, profits, color="#FF5A5F", linewidth=2.5)
-            ax4.axhline(0, color="#767676", linestyle="--", lw=1.2, alpha=0.6, label="손익분기선")
-            ax4.axvline(delta_pct, color="#FFB400", linestyle="--", lw=1.5, label=f"현재 ({delta_pct:+d}%)")
-            ax4.scatter([delta_pct], [new_net], color="#FFB400", s=70, zorder=6)
-            ax4.fill_between(x_range*100, profits, 0, where=[p > 0 for p in profits], alpha=0.07, color="#4CAF50")
-            ax4.fill_between(x_range*100, profits, 0, where=[p <= 0 for p in profits], alpha=0.07, color="#FF5A5F")
-            ax4.set_xlabel("요금 변화율 (%)"); ax4.set_ylabel("월 순이익 (원)")
-            ax4.yaxis.set_major_formatter(plt.FuncFormatter(lambda y, _: f"₩{y/10000:.0f}만"))
-            ax4.legend(fontsize=8)
-            ax4.spines["top"].set_visible(False); ax4.spines["right"].set_visible(False)
-            ax4.set_facecolor("#FAFAFA"); fig4.patch.set_facecolor("#FAFAFA")
-            fig4.tight_layout()
-            st.pyplot(fig4); plt.close()
-            best_idx  = int(np.argmax(profits))
-            best_adr  = my_adr * (1 + x_range[best_idx])
-            best_prof = profits[best_idx]
-            st.success(f"🎯 최대 순이익: ₩{int(best_adr):,} ({x_range[best_idx]*100:+.0f}%) → 월 ₩{int(best_prof):,}")
-
-    # ── G. 지역 시장 진단 ────────────────────────────────────────────────────
-    st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
-    section_title(
-        f"{c_info['emoji']} {d_name} 시장 유형: {cluster_name}",
-        c_info["desc"],
-    )
-
-    col_m1, col_m2 = st.columns([1, 1.4])
-    with col_m1:
-        st.markdown(
-            f'<div style="background:{c_info["color"]}15;border:2px solid {c_info["color"]};'
-            f'border-radius:12px;padding:20px;">'
-            f'<div style="font-size:34px;">{c_info["emoji"]}</div>'
-            f'<div style="font-weight:700;font-size:15px;color:{c_info["color"]};margin:8px 0;">{cluster_name}</div>'
-            f'<div style="font-size:13px;color:#484848;">{c_info["desc"]}</div>'
-            f'</div>',
-            unsafe_allow_html=True,
-        )
-        if len(d_row) > 0:
-            row = d_row.iloc[0]
-            info_row("지역 평균 하루 수익", f"₩{int(row.get('median_revpar_ao', 0)):,}")
-            info_row("비활성 숙소 비율", f"{row.get('dormant_ratio', 0):.1%}")
-            info_row("슈퍼호스트 비율", f"{row.get('superhost_rate', 0):.1%}")
-
-    with col_m2:
-        st.markdown("**이 지역에서 수익을 올리는 전략:**")
-        for i, strat in enumerate(c_info["strategy"], 1):
-            st.markdown(
-                f'<div style="background:white;border:1.5px solid #EBEBEB;border-radius:8px;'
-                f'padding:10px 14px;margin-bottom:6px;">'
-                f'<span style="background:#FF5A5F;color:white;border-radius:50%;padding:1px 7px;'
-                f'font-size:11px;font-weight:700;margin-right:8px;">{i}</span>'
-                f'<span style="font-size:14px;">{strat}</span>'
-                f'</div>',
-                unsafe_allow_html=True,
-            )
+        _render_market_tab(tab4)
 
     # ── 다시 시작 ────────────────────────────────────────────────────────────
     st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
