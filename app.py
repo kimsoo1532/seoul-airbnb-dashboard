@@ -56,15 +56,31 @@ st.markdown("""
   [data-testid="stSidebar"] { display: none !important; }
   [data-testid="collapsedControl"] { display: none !important; }
 
-  /* 기본 버튼 */
+  /* 기본 버튼 — 흰색 (캘린더 미선택 날짜도 이 스타일) */
   .stButton > button {
-    background-color: #FF5A5F !important; color: white !important;
-    border: none !important; border-radius: 10px !important;
+    background-color: white !important; color: #484848 !important;
+    border: 1.5px solid #DDDDDD !important; border-radius: 10px !important;
     padding: 12px 28px !important; font-size: 15px !important;
     font-weight: 600 !important; width: 100% !important;
     cursor: pointer !important; transition: background 0.2s !important;
   }
-  .stButton > button:hover { background-color: #E8484D !important; }
+  .stButton > button:hover { background-color: #F7F7F7 !important; }
+
+  /* 주요 액션 버튼 — 코랄 (다음 단계, 분석 결과 보기 등) */
+  .nav-primary .stButton > button {
+    background-color: #FF5A5F !important; color: white !important;
+    border: none !important;
+  }
+  .nav-primary .stButton > button:hover { background-color: #E8484D !important; }
+
+  /* 예약된 날짜 버튼 (type="primary") — 코랄 */
+  .stButton > button[data-testid="stBaseButton-primary"],
+  button[kind="primary"] {
+    background-color: #FF5A5F !important; color: white !important;
+    border: none !important;
+  }
+  .stButton > button[data-testid="stBaseButton-primary"]:hover,
+  button[kind="primary"]:hover { background-color: #E8484D !important; }
 
   /* 뒤로가기 버튼 */
   .back-btn .stButton > button {
@@ -174,9 +190,9 @@ st.markdown("""
     font-size: 12px; font-weight: 600; margin-right: 4px;
   }
 
-  /* 네비게이션 버튼 정렬 — back-btn/nav-balance 마크다운 래퍼를 0높이로 */
+  /* 네비게이션 버튼 정렬 — back-btn/nav-primary 마크다운 래퍼를 0높이로 */
   div[data-testid="stMarkdownContainer"]:has(.back-btn),
-  div[data-testid="stMarkdownContainer"]:has(.nav-balance) {
+  div[data-testid="stMarkdownContainer"]:has(.nav-primary) {
     height: 0 !important; min-height: 0 !important;
     overflow: hidden !important; margin: 0 !important; padding: 0 !important;
   }
@@ -642,49 +658,51 @@ def render_calendar():
             is_sunday   = (i == 0)
             is_saturday = (i == 6)
 
-            if day == 0:
-                # 빈 칸 — 버튼(44px) + 공휴일 텍스트(15px) 합계 높이 맞춤
-                cols[i].markdown('<div style="height:59px;"></div>', unsafe_allow_html=True)
-            else:
-                is_booked  = day in booked
-                hname      = year_holidays.get((month, day), "")
-                is_holiday = bool(hname)
-
-                # ── CSS 클래스 결정 (우선순위: 예약 > 요일/공휴일) ────────
-                if is_booked:
-                    css_class = "cal-booked-red" if is_sunday else (
-                                "cal-booked-blue" if is_saturday else "cal-booked")
-                elif is_sunday or (is_holiday and is_sunday):
-                    css_class = "cal-sun"
-                elif is_saturday:
-                    css_class = "cal-sat"
-                elif is_holiday:
-                    css_class = "cal-holiday"
+            with cols[i]:
+                if day == 0:
+                    # 빈 칸
+                    st.markdown('<div style="height:59px;"></div>', unsafe_allow_html=True)
                 else:
-                    css_class = "cal-weekday"
+                    is_booked  = day in booked
+                    hname      = year_holidays.get((month, day), "")
+                    is_holiday = bool(hname)
 
-                # ── 버튼 (날짜 숫자만) ────────────────────────────────────
-                cols[i].markdown(f'<div class="{css_class}">', unsafe_allow_html=True)
-                if cols[i].button(str(day), key=f"cal_{year}_{month}_{day}",
-                                  use_container_width=True):
-                    if day in booked:
-                        st.session_state.booked_days.discard(day)
+                    # ── CSS 클래스 결정 (우선순위: 예약 > 요일/공휴일) ────────
+                    if is_booked:
+                        css_class = "cal-booked-red" if is_sunday else (
+                                    "cal-booked-blue" if is_saturday else "cal-booked")
+                    elif is_sunday or (is_holiday and is_sunday):
+                        css_class = "cal-sun"
+                    elif is_saturday:
+                        css_class = "cal-sat"
+                    elif is_holiday:
+                        css_class = "cal-holiday"
                     else:
-                        st.session_state.booked_days.add(day)
-                    st.rerun()
+                        css_class = "cal-weekday"
 
-                # ── 공휴일 이름 (버튼 아래, 15px 고정 행) ────────────────
-                if hname:
-                    hcolor = "white" if is_booked else "#FF3B30"
-                    short  = hname if len(hname) <= 5 else hname[:4] + "…"
-                    cols[i].markdown(
-                        f'<div style="text-align:center;font-size:9px;font-weight:600;'
-                        f'color:{hcolor};height:15px;line-height:15px;'
-                        f'overflow:hidden;white-space:nowrap;">{short}</div>',
-                        unsafe_allow_html=True,
-                    )
-                else:
-                    cols[i].markdown('<div style="height:15px;"></div>', unsafe_allow_html=True)
+                    # ── 버튼 (날짜 숫자만) — 예약됨: primary(코랄), 미예약: secondary(흰색) ──
+                    st.markdown(f'<div class="{css_class}">', unsafe_allow_html=True)
+                    btn_type = "primary" if is_booked else "secondary"
+                    if st.button(str(day), key=f"cal_{year}_{month}_{day}",
+                                 use_container_width=True, type=btn_type):
+                        if day in booked:
+                            st.session_state.booked_days.discard(day)
+                        else:
+                            st.session_state.booked_days.add(day)
+                        st.rerun()
+
+                    # ── 공휴일 이름 (버튼 아래, 15px 고정 행) ────────────────
+                    if hname:
+                        hcolor = "white" if is_booked else "#FF3B30"
+                        short  = hname if len(hname) <= 5 else hname[:4] + "…"
+                        st.markdown(
+                            f'<div style="text-align:center;font-size:9px;font-weight:600;'
+                            f'color:{hcolor};height:15px;line-height:15px;'
+                            f'overflow:hidden;white-space:nowrap;">{short}</div>',
+                            unsafe_allow_html=True,
+                        )
+                    else:
+                        st.markdown('<div style="height:15px;"></div>', unsafe_allow_html=True)
 
         # 주 구분선 (마지막 주 제외)
         if w_idx < len(month_cal) - 1:
@@ -853,7 +871,8 @@ def step1():
     if ht is None:
         st.info("위에서 호스터 유형을 선택해야 다음 단계로 넘어갈 수 있습니다.")
     else:
-        if st.button("다음 단계 →", key="next1", use_container_width=True):
+        st.markdown('<div class="nav-primary">', unsafe_allow_html=True)
+        if st.button("다음 단계 →", key="next1", use_container_width=True, type="primary"):
             st.session_state.step = 2
             st.rerun()
 
@@ -1024,8 +1043,8 @@ def step2_new():
             st.session_state.step = 1
             st.rerun()
     with nc2:
-        st.markdown('<div class="nav-balance"></div>', unsafe_allow_html=True)
-        if st.button("다음 단계 →", key="next2n", use_container_width=True):
+        st.markdown('<div class="nav-primary">', unsafe_allow_html=True)
+        if st.button("다음 단계 →", key="next2n", use_container_width=True, type="primary"):
             st.session_state.step = 3
             st.rerun()
 
@@ -1121,8 +1140,8 @@ def step2_existing():
             st.session_state.step = 1
             st.rerun()
     with nc2:
-        st.markdown('<div class="nav-balance"></div>', unsafe_allow_html=True)
-        if st.button("다음 단계 →", key="next2e", use_container_width=True):
+        st.markdown('<div class="nav-primary">', unsafe_allow_html=True)
+        if st.button("다음 단계 →", key="next2e", use_container_width=True, type="primary"):
             st.session_state.step = 3
             st.rerun()
 
@@ -1176,10 +1195,10 @@ def step3():
             st.session_state.step = 2
             st.rerun()
     with nc2:
-        st.markdown('<div class="nav-balance"></div>', unsafe_allow_html=True)
+        st.markdown('<div class="nav-primary">', unsafe_allow_html=True)
         next_step = 5 if st.session_state.host_type == "new" else 4
         label = "🔍 분석 결과 보기" if next_step == 5 else "다음 단계 →"
-        if st.button(label, key="next3", use_container_width=True):
+        if st.button(label, key="next3", use_container_width=True, type="primary"):
             st.session_state.step = next_step
             st.rerun()
 
@@ -1277,8 +1296,8 @@ def step4_existing():
             st.session_state.step = 3
             st.rerun()
     with nc2:
-        st.markdown('<div class="nav-balance"></div>', unsafe_allow_html=True)
-        if st.button("🔍 분석 결과 보기", key="next4", use_container_width=True):
+        st.markdown('<div class="nav-primary">', unsafe_allow_html=True)
+        if st.button("🔍 분석 결과 보기", key="next4", use_container_width=True, type="primary"):
             st.session_state.step = 5
             st.rerun()
 
@@ -1906,7 +1925,8 @@ def step5():
     st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
     _, c_center, _ = st.columns([1, 2, 1])
     with c_center:
-        if st.button("🔄 처음부터 다시 입력하기", key="restart", use_container_width=True):
+        st.markdown('<div class="nav-primary">', unsafe_allow_html=True)
+        if st.button("🔄 처음부터 다시 입력하기", key="restart", use_container_width=True, type="primary"):
             for key in list(st.session_state.keys()):
                 del st.session_state[key]
             st.rerun()
