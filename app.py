@@ -7,6 +7,8 @@ import platform
 import calendar as cal_mod
 from math import radians, sin, cos, sqrt, atan2
 from datetime import datetime
+from pathlib import Path
+import sys
 import requests
 
 # ── 페이지 설정 ───────────────────────────────────────────────────────────────
@@ -389,6 +391,29 @@ active_df = df[
     (df["refined_status"] == "Active") & (df["operation_status"] == "Operating")
 ].copy()
 poi_db = build_poi_db()
+
+# ── ML 모델 로드 (INTEGRATION_GUIDE.md 캐싱 패턴) ─────────────────────────────
+_PKG_DIR = Path(__file__).parent / "revpar_model_package"
+if str(_PKG_DIR) not in sys.path:
+    sys.path.insert(0, str(_PKG_DIR))
+
+from predict_utils import load_models, predict_revpar, compute_health_score  # noqa: E402
+
+@st.cache_resource
+def load_ml_models():
+    return load_models(_PKG_DIR / "models")
+
+@st.cache_data
+def load_district_lookup():
+    return pd.read_csv(str(_PKG_DIR / "district_lookup.csv")).set_index("district")
+
+@st.cache_data
+def load_cluster_listings():
+    return pd.read_csv(str(_PKG_DIR / "cluster_listings_ao.csv"))
+
+ml_artifacts       = load_ml_models()
+ml_district_lookup = load_district_lookup()
+ml_ao_df           = load_cluster_listings()
 
 # ── 헬퍼 함수 ────────────────────────────────────────────────────────────────
 def get_bench(district, room_type):
@@ -1358,6 +1383,91 @@ def step5():
 
     # ── 헤더 ────────────────────────────────────────────────────────────────
     host_badge = "🌱 신규 호스터" if host_type == "new" else "🏅 기존 호스터"
+
+    # ── ML 예측 계산 ─────────────────────────────────────────────────────────
+    def _poi_dist_cat(d):
+        if d < 0.2:  return "초근접"
+        if d < 0.5:  return "근접"
+        if d < 1.0:  return "보통"
+        return "원거리"
+
+    def _photos_tier(n):
+        if n < 14:   return "하"
+        if n < 23:   return "중하"
+        if n <= 35:  return "중상"
+        return "상"
+
+    # POI 거리 계산 (위치 확인 시 실거리, 없으면 벤치마크 중위값)
+    if my_lat and my_lng:
+        _nearby_pois = find_nearby_pois(my_lat, my_lng, max_km=5.0)
+        _poi_dist = _nearby_pois[0]["dist_km"] if _nearby_pois else 0.5
+        _poi_type = _nearby_pois[0]["type"]    if _nearby_pois else "관광지"
+    else:
+        _poi_dist = float(bench_val(bench, "nearest_poi_dist_km", 0.5))
+        _poi_type = "관광지"
+
+    # district_lookup 조회
+    _dl = ml_district_lookup.loc[district] if district in ml_district_lookup.index \
+        else ml_district_lookup.iloc[0]
+
+    _listing = {
+        "cluster":                   int(_dl["cluster"]),
+        "district_median_revpar":    float(_dl["district_median_revpar"]),
+        "district_listing_count":    int(_dl["district_listing_count"]),
+        "district_superhost_rate":   float(_dl["district_superhost_rate"]),
+        "district_entire_home_rate": float(_dl["district_entire_home_rate"]),
+        "ttm_pop":                   int(_dl["ttm_pop"]),
+        "room_type":                 room_type,
+        "bedrooms":    int(st.session_state.my_bedrooms  or bench_val(bench, "bedrooms", 1)),
+        "baths":     float(st.session_state.my_baths_count or bench_val(bench, "baths", 1)),
+        "guests":      int(st.session_state.my_guests    or bench_val(bench, "guests",   2)),
+        "min_nights":              my_min_nights,
+        "instant_book":            1 if my_instant  else 0,
+        "superhost":               1 if my_superhost else 0,
+        "rating_overall":          my_rating  or 4.5,
+        "photos_count":            my_photos  or 0,
+        "num_reviews":             my_reviews or 0,
+        "extra_guest_fee_policy":  "1" if my_extra_fee else "0",
+        "is_active_operating":     1,
+        "nearest_poi_dist_km":     _poi_dist,
+        "poi_dist_category":       _poi_dist_cat(_poi_dist),
+        "nearest_poi_type_name":   _poi_type,
+        "photos_tier":             _photos_tier(my_photos or 0),
+        "ttm_avg_rate":            my_adr,
+    }
+
+    try:
+        _ml    = predict_revpar(_listing, opex_per_month=total_opex, **ml_artifacts)
+        _ml_ok = True
+    except Exception:
+        _ml_ok = False
+        _ml    = {}
+
+    # 헬스스코어 (기존 호스터 전용)
+    if host_type == "existing":
+        _cluster_id       = int(_dl["cluster"])
+        _cluster_listings = ml_ao_df[ml_ao_df["cluster"] == _cluster_id]
+        _user_vals = {
+            "my_reviews":    my_reviews or 0,
+            "my_rating":     my_rating  or 4.5,
+            "my_photos":     my_photos  or 0,
+            "my_instant":    my_instant,
+            "my_min_nights": my_min_nights,
+            "my_extra_fee":  my_extra_fee,
+            "my_poi_dist":   _poi_dist,
+            "my_bedrooms":   int(st.session_state.my_bedrooms   or bench_val(bench, "bedrooms", 1)),
+            "my_baths":    float(st.session_state.my_baths_count or bench_val(bench, "baths",    1)),
+        }
+        try:
+            _hs    = compute_health_score(_user_vals, _cluster_listings)
+            _hs_ok = True
+        except Exception:
+            _hs_ok = False
+            _hs    = {}
+    else:
+        _hs_ok = False
+        _hs    = {}
+
     st.markdown(f"""
     <div style="text-align:center;padding:20px 0 4px;">
       <div style="font-size:34px;">🏠</div>
@@ -1551,6 +1661,48 @@ def step5():
                 plt.close()
             else:
                 st.info("운영비를 입력하면 구성 차트가 표시됩니다.")
+
+        # ── ML 시장 예측 섹션 ────────────────────────────────────────────────
+        if _ml_ok:
+            st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
+            section_title(
+                "🤖 ML 시장 예측",
+                "서울 실운영 14,399개 리스팅 학습 모델(LightGBM) 기반 시장 적정값입니다.",
+            )
+            mc1, mc2, mc3 = st.columns(3)
+
+            adr_diff   = _ml["ADR_pred"]   - my_adr
+            occ_diff   = _ml["Occ_pred"]   - my_occ
+            revp_diff  = _ml["RevPAR_pred"] - my_revpar
+
+            kpi_card(mc1, "ML 적정 ADR",
+                     f"₩{int(_ml['ADR_pred']):,}",
+                     f"{'▲' if adr_diff >= 0 else '▼'} 내 요금 대비 ₩{int(abs(adr_diff)):,}",
+                     "#2E7D32" if adr_diff >= 0 else "#C62828")
+            kpi_card(mc2, "ML 예측 예약률",
+                     f"{_ml['Occ_pred']:.1%}",
+                     f"{'▲' if occ_diff >= 0 else '▼'} 내 예약률 대비 {abs(occ_diff)*100:.1f}%p",
+                     "#2E7D32" if occ_diff >= 0 else "#C62828")
+            kpi_card(mc3, "ML 예측 RevPAR",
+                     f"₩{int(_ml['RevPAR_pred']):,}",
+                     f"{'▲' if revp_diff >= 0 else '▼'} 현재 대비 ₩{int(abs(revp_diff)):,}",
+                     "#2E7D32" if revp_diff >= 0 else "#C62828")
+
+            # 월 수익 + 순이익 (ML 기준)
+            ml_net = _ml["net_profit"]
+            ml_net_color = "#2E7D32" if ml_net >= 0 else "#C62828"
+            st.markdown(
+                f'<div style="background:#F9F9F9;border-radius:12px;padding:14px 20px;'
+                f'margin-top:10px;display:flex;gap:28px;flex-wrap:wrap;">'
+                f'<span style="font-size:13px;color:#767676;">ML 기준 월 예상 수익: '
+                f'<b style="color:#484848;">₩{int(_ml["monthly_revenue"]):,}</b></span>'
+                f'<span style="font-size:13px;color:#767676;">ML 기준 월 순이익: '
+                f'<b style="color:{ml_net_color};">₩{int(ml_net):,}</b></span>'
+                f'<span style="font-size:11px;color:#AAAAAA;align-self:center;">'
+                f'운영비 ₩{int(total_opex):,} 반영</span>'
+                f'</div>',
+                unsafe_allow_html=True,
+            )
 
     # ── TAB 2: 요금 전략 ─────────────────────────────────────────────────────
     with tab2:
@@ -1916,6 +2068,69 @@ def step5():
                     )
             else:
                 st.success("🎉 모든 운영 레버가 최적 상태입니다!")
+
+            # ── 운영 헬스 스코어 ─────────────────────────────────────────────
+            st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
+            section_title(
+                "🩺 운영 건강 점수",
+                f"동일 클러스터({cluster_name}) 내 Active+Operating 숙소 {len(_cluster_listings):,}개 기준 백분위 비교입니다.",
+            )
+            if _hs_ok:
+                grade_colors = {
+                    "A": "#2E7D32", "B": "#00A699",
+                    "C": "#FFB400", "D": "#FF8C00", "F": "#C62828",
+                }
+                gc = grade_colors.get(_hs["grade"], "#767676")
+                hs_c1, hs_c2 = st.columns([1, 2])
+
+                with hs_c1:
+                    st.markdown(
+                        f'<div style="background:{gc}18;border:2.5px solid {gc};border-radius:16px;'
+                        f'padding:28px 20px;text-align:center;">'
+                        f'<div style="font-size:52px;font-weight:800;color:{gc};">{int(_hs["composite"])}</div>'
+                        f'<div style="font-size:13px;color:#767676;margin-top:2px;">/ 100</div>'
+                        f'<div style="background:{gc};color:white;border-radius:50%;width:48px;height:48px;'
+                        f'display:inline-flex;align-items:center;justify-content:center;'
+                        f'font-size:22px;font-weight:800;margin-top:12px;">{_hs["grade"]}</div>'
+                        f'<div style="font-size:12px;color:#767676;margin-top:8px;">클러스터 내 백분위 기준</div>'
+                        f'</div>',
+                        unsafe_allow_html=True,
+                    )
+
+                with hs_c2:
+                    comp_labels = {
+                        "review_signal":   "리뷰 신호",
+                        "listing_quality": "사진 품질",
+                        "booking_policy":  "예약 정책",
+                        "location":        "위치",
+                        "listing_config":  "숙소 구성",
+                    }
+                    bar_html = ""
+                    for key, label in comp_labels.items():
+                        v = _hs["components"][key]
+                        color = "#2E7D32" if v >= 70 else "#FFB400" if v >= 40 else "#C62828"
+                        bar_html += (
+                            f'<div style="margin-bottom:10px;">'
+                            f'<div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;">'
+                            f'<span style="color:#484848;">{label}</span>'
+                            f'<span style="font-weight:600;color:{color};">{int(v)}/100</span></div>'
+                            f'<div style="background:#EBEBEB;border-radius:6px;height:8px;">'
+                            f'<div style="background:{color};width:{v:.0f}%;height:8px;border-radius:6px;"></div>'
+                            f'</div></div>'
+                        )
+                    st.markdown(bar_html, unsafe_allow_html=True)
+
+                    if _hs["actions"] and not _hs["actions"][0].startswith("✅"):
+                        actions_html = (
+                            '<div style="margin-top:8px;background:#FFF5F5;border-radius:8px;padding:12px 14px;">'
+                            '<div style="font-size:11px;font-weight:700;color:#C62828;margin-bottom:6px;">개선 액션</div>'
+                        )
+                        for a in _hs["actions"]:
+                            actions_html += f'<div style="font-size:12px;color:#484848;margin-bottom:4px;">{a}</div>'
+                        actions_html += "</div>"
+                        st.markdown(actions_html, unsafe_allow_html=True)
+            else:
+                st.warning("헬스 스코어 계산 중 오류가 발생했습니다.")
 
         _render_market_tab(tab5)
     else:
