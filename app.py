@@ -1482,14 +1482,16 @@ def step5():
     st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
 
     if host_type == "existing":
-        tab1, tab2, tab3, tab4, tab5 = st.tabs([
-            "📊 수익 요약", "💡 요금 전략", "📍 주변 관광지", "📋 운영 개선", "🏙️ 지역 진단"
+        tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
+            "📊 수익 요약", "💡 요금 전략", "📍 주변 관광지",
+            "📋 운영 개선", "🏙️ 지역 진단", "🩺 헬스 스코어"
         ])
     else:
         tab1, tab2, tab3, tab4 = st.tabs([
             "📊 수익 요약", "💡 요금 추천", "📍 주변 관광지", "🏙️ 지역 진단"
         ])
         tab5 = None
+        tab6 = None
 
     # ── TAB 1: 수익 요약 (KPI + 손익계산서) ─────────────────────────────────
     with tab1:
@@ -2069,11 +2071,13 @@ def step5():
             else:
                 st.success("🎉 모든 운영 레버가 최적 상태입니다!")
 
-            # ── 운영 헬스 스코어 ─────────────────────────────────────────────
-            st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
+        _render_market_tab(tab5)
+
+        # ── TAB 6: 헬스 스코어 (기존 호스터) ────────────────────────────────
+        with tab6:
             section_title(
-                "🩺 운영 건강 점수",
-                f"동일 클러스터({cluster_name}) 내 Active+Operating 숙소 {len(_cluster_listings):,}개 기준 백분위 비교입니다.",
+                "🩺 숙소 운영 건강 점수",
+                f"동일 클러스터({cluster_name}) 내 Active+Operating 숙소 {len(_cluster_listings):,}개와 비교한 5가지 운영 건강 지표입니다.",
             )
             if _hs_ok:
                 grade_colors = {
@@ -2081,58 +2085,68 @@ def step5():
                     "C": "#FFB400", "D": "#FF8C00", "F": "#C62828",
                 }
                 gc = grade_colors.get(_hs["grade"], "#767676")
-                hs_c1, hs_c2 = st.columns([1, 2])
 
+                hs_c1, hs_c2 = st.columns([1, 2])
                 with hs_c1:
                     st.markdown(
                         f'<div style="background:{gc}18;border:2.5px solid {gc};border-radius:16px;'
-                        f'padding:28px 20px;text-align:center;">'
-                        f'<div style="font-size:52px;font-weight:800;color:{gc};">{int(_hs["composite"])}</div>'
-                        f'<div style="font-size:13px;color:#767676;margin-top:2px;">/ 100</div>'
-                        f'<div style="background:{gc};color:white;border-radius:50%;width:48px;height:48px;'
+                        f'padding:32px 20px;text-align:center;">'
+                        f'<div style="font-size:14px;color:#888;margin-bottom:8px;font-weight:600;">종합 점수</div>'
+                        f'<div style="font-size:64px;font-weight:800;color:{gc};line-height:1;">{int(_hs["composite"])}</div>'
+                        f'<div style="font-size:14px;color:#767676;margin-top:4px;">/ 100</div>'
+                        f'<div style="background:{gc};color:white;border-radius:50%;width:52px;height:52px;'
                         f'display:inline-flex;align-items:center;justify-content:center;'
-                        f'font-size:22px;font-weight:800;margin-top:12px;">{_hs["grade"]}</div>'
-                        f'<div style="font-size:12px;color:#767676;margin-top:8px;">클러스터 내 백분위 기준</div>'
+                        f'font-size:24px;font-weight:800;margin-top:14px;">{_hs["grade"]}</div>'
+                        f'<div style="font-size:11px;color:#767676;margin-top:10px;">클러스터 내 백분위 기준</div>'
                         f'</div>',
                         unsafe_allow_html=True,
                     )
 
                 with hs_c2:
                     comp_labels = {
-                        "review_signal":   "리뷰 신호",
-                        "listing_quality": "사진 품질",
-                        "booking_policy":  "예약 정책",
-                        "location":        "위치",
-                        "listing_config":  "숙소 구성",
+                        "review_signal":   ("리뷰 신호",   "리뷰 수 & 평점 백분위"),
+                        "listing_quality": ("사진 품질",   "최적 23~35장 기준"),
+                        "booking_policy":  ("예약 정책",   "즉시예약·최소박·추가요금"),
+                        "location":        ("위치",        "POI 거리 (가까울수록 높음)"),
+                        "listing_config":  ("숙소 구성",   "침실·욕실 수 백분위"),
                     }
                     bar_html = ""
-                    for key, label in comp_labels.items():
+                    for key, (label, hint) in comp_labels.items():
                         v = _hs["components"][key]
                         color = "#2E7D32" if v >= 70 else "#FFB400" if v >= 40 else "#C62828"
                         bar_html += (
-                            f'<div style="margin-bottom:10px;">'
-                            f'<div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;">'
-                            f'<span style="color:#484848;">{label}</span>'
-                            f'<span style="font-weight:600;color:{color};">{int(v)}/100</span></div>'
-                            f'<div style="background:#EBEBEB;border-radius:6px;height:8px;">'
-                            f'<div style="background:{color};width:{v:.0f}%;height:8px;border-radius:6px;"></div>'
-                            f'</div></div>'
+                            f'<div style="margin-bottom:14px;">'
+                            f'<div style="display:flex;justify-content:space-between;margin-bottom:5px;">'
+                            f'<div><span style="font-size:14px;font-weight:600;color:#484848;">{label}</span>'
+                            f'<span style="font-size:11px;color:#AAA;margin-left:6px;">{hint}</span></div>'
+                            f'<span style="font-size:14px;font-weight:700;color:{color};">{int(v)}/100</span></div>'
+                            f'<div style="background:#EBEBEB;border-radius:6px;height:10px;">'
+                            f'<div style="background:{color};width:{v:.0f}%;height:10px;border-radius:6px;'
+                            f'transition:width 0.3s;"></div></div></div>'
                         )
                     st.markdown(bar_html, unsafe_allow_html=True)
 
-                    if _hs["actions"] and not _hs["actions"][0].startswith("✅"):
-                        actions_html = (
-                            '<div style="margin-top:8px;background:#FFF5F5;border-radius:8px;padding:12px 14px;">'
-                            '<div style="font-size:11px;font-weight:700;color:#C62828;margin-bottom:6px;">개선 액션</div>'
+                # 개선 액션 (full width)
+                if _hs["actions"] and not _hs["actions"][0].startswith("✅"):
+                    st.markdown("<br>", unsafe_allow_html=True)
+                    actions_html = (
+                        '<div style="background:#FFF5F5;border:1.5px solid #FFCDD2;'
+                        'border-radius:12px;padding:16px 18px;">'
+                        '<div style="font-size:13px;font-weight:700;color:#C62828;margin-bottom:10px;">'
+                        '🎯 지금 개선하면 점수가 올라가요</div>'
+                    )
+                    for a in _hs["actions"]:
+                        actions_html += (
+                            f'<div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:8px;">'
+                            f'<span style="font-size:13px;color:#484848;">{a}</span></div>'
                         )
-                        for a in _hs["actions"]:
-                            actions_html += f'<div style="font-size:12px;color:#484848;margin-bottom:4px;">{a}</div>'
-                        actions_html += "</div>"
-                        st.markdown(actions_html, unsafe_allow_html=True)
+                    actions_html += "</div>"
+                    st.markdown(actions_html, unsafe_allow_html=True)
+                else:
+                    st.success("🎉 모든 운영 지표가 클러스터 상위권입니다! 현재 상태를 유지하세요.")
             else:
                 st.warning("헬스 스코어 계산 중 오류가 발생했습니다.")
 
-        _render_market_tab(tab5)
     else:
         _render_market_tab(tab4)
 
