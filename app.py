@@ -19,13 +19,23 @@ st.set_page_config(
 
 # ── 한글 폰트 ─────────────────────────────────────────────────────────────────
 def set_korean_font():
+    import os
     system = platform.system()
     if system == "Darwin":
         candidates = ["AppleGothic", "Apple SD Gothic Neo", "Arial Unicode MS"]
     elif system == "Windows":
         candidates = ["Malgun Gothic", "NanumGothic", "Gulim"]
     else:
-        candidates = ["NanumGothic", "NanumBarunGothic", "UnDotum"]
+        # Linux (Streamlit Cloud 등) — fonts-nanum 패키지 경로 직접 등록
+        nanum_paths = [
+            "/usr/share/fonts/truetype/nanum/NanumGothic.ttf",
+            "/usr/share/fonts/nanum/NanumGothic.ttf",
+        ]
+        for p in nanum_paths:
+            if os.path.exists(p):
+                fm.fontManager.addfont(p)
+                break
+        candidates = ["NanumGothic", "NanumBarunGothic", "UnDotum", "DejaVu Sans"]
     available = [f.name for f in fm.fontManager.ttflist]
     for font in candidates:
         if font in available:
@@ -187,6 +197,32 @@ ROOM_STYLES = ["모던/미니멀", "빈티지/레트로", "한옥/전통", "아�
 POI_TYPE_ICON = {
     "관광지": "🗺️", "문화시설": "🏛️", "쇼핑": "🛍️", "음식점": "🍽️",
     "숙박": "🏨", "레포츠": "⛷️", "여행코스": "🚶", "축제공연행사": "🎭",
+}
+
+# 2026년 대한민국 공휴일 (월, 일) 기준
+HOLIDAYS = {
+    2026: {
+        (1, 1): "신정",
+        (2, 16): "설날 전날",
+        (2, 17): "설날",
+        (2, 18): "설날 다음날",
+        (3, 1): "삼일절",
+        (3, 2): "삼일절 대체",
+        (5, 5): "어린이날",
+        (5, 24): "부처님오신날",
+        (5, 25): "부처님오신날 대체",
+        (6, 3): "지방선거일",
+        (6, 6): "현충일",
+        (8, 15): "광복절",
+        (8, 17): "광복절 대체",
+        (9, 24): "추석 전날",
+        (9, 25): "추석",
+        (9, 26): "추석 다음날",
+        (10, 3): "개천절",
+        (10, 5): "개천절 대체",
+        (10, 9): "한글날",
+        (12, 25): "크리스마스",
+    }
 }
 
 # 자치구 중심 좌표
@@ -360,6 +396,10 @@ def init_state():
         "my_occ_pct": None,
         "weekday_occ_pct": 0,
         "weekend_occ_pct": 0,
+        "weekdays_booked": 0,
+        "weekends_booked": 0,
+        "weekdays_total": 22,
+        "weekends_total": 9,
         # 운영비
         "opex_elec": 80000, "opex_water": 30000, "opex_mgmt": 150000,
         "opex_net": 30000, "opex_clean": 200000, "opex_loan": 0, "opex_etc": 50000,
@@ -551,17 +591,32 @@ def render_calendar():
                 )
             else:
                 is_booked = day in booked
+                is_holiday = (month, day) in HOLIDAYS.get(year, {})
+
                 if is_booked:
-                    bg, fc, fw = "#FF5A5F", "white", "700"
+                    # 예약됨 — 빨간 배경
+                    bg = "#FF5A5F"
+                    indicator = "✓"
                     label = f"✓{day}"
+                elif is_holiday:
+                    # 공휴일 — 연한 빨강 배경
+                    bg = "#FFF0EE"
+                    indicator = "●"
+                    label = str(day)
                 else:
-                    bg, fc, fw = "#F7F7F7", "#484848", "400"
+                    # 일반 날짜 — 흰 배경
+                    bg = "white"
+                    indicator = "&nbsp;"
                     label = str(day)
 
+                hname = HOLIDAYS.get(year, {}).get((month, day), "")
+                tooltip = f'title="{hname}"' if hname else ""
                 cols[i].markdown(
-                    f'<div style="background:{bg};color:{fc};font-weight:{fw};'
-                    f'border-radius:8px;text-align:center;font-size:13px;'
-                    f'padding:2px;margin-bottom:2px;">&nbsp;</div>',
+                    f'<div {tooltip} style="background:{bg};border-radius:8px;'
+                    f'text-align:center;padding:2px;margin-bottom:2px;'
+                    f'border:1px solid {"#FFCDD2" if is_holiday and not is_booked else "transparent"};">'
+                    f'<span style="font-size:10px;color:{"#FF5A5F" if is_holiday and not is_booked else "transparent"};">{indicator}</span>'
+                    f'</div>',
                     unsafe_allow_html=True,
                 )
                 if cols[i].button(label, key=f"cal_{year}_{month}_{day}", use_container_width=True):
@@ -617,14 +672,6 @@ def step1():
         sel_kr = st.selectbox("자치구 선택", options_kr, index=default_idx, label_visibility="collapsed")
         st.session_state.district = districts[options_kr.index(sel_kr)]
 
-        bench = get_bench(st.session_state.district, st.session_state.room_type)
-        if len(bench) > 0:
-            med = bench_val(bench, "ttm_revpar", 40000)
-            coral_box(
-                f'<span style="font-size:12px;color:#888;">이 지역 실운영 숙소 평균 하루 수익</span><br>'
-                f'<span style="font-size:22px;font-weight:700;color:#FF5A5F;">₩{int(med):,}</span>'
-                f'<span style="font-size:12px;color:#888;"> / 박 ({len(bench):,}개)</span>'
-            )
 
     with col2:
         st.markdown(
@@ -954,6 +1001,10 @@ def step2_existing():
     st.session_state.my_occ_pct = int(occ_rate * 100)
     st.session_state.weekday_occ_pct = int(weekday_occ * 100)
     st.session_state.weekend_occ_pct = int(weekend_occ * 100)
+    st.session_state.weekdays_booked = wd_booked
+    st.session_state.weekends_booked = we_booked
+    st.session_state.weekdays_total = wd_total
+    st.session_state.weekends_total = we_total
 
     # 예약률 요약 — 평일 / 주말 분리
     my_revpar = my_adr * occ_rate
@@ -1255,43 +1306,107 @@ def step5():
                  "#2E7D32" if revpar_diff >= 0 else "#C62828")
         kpi_card(k2, "월 예상 순이익", f"₩{int(net_profit):,}",
                  "흑자 ✅" if net_profit > 0 else "적자 ❌", profit_color)
-        kpi_card(k3, "본전 요금", f"₩{int(bep_adr):,}",
-                 f"현재 요금 {'이상 ✅' if bep_ok else '이하 ❌'}",
+        kpi_card(k3, "적자 예방 최소 요금", f"₩{int(bep_adr):,}",
+                 f"현재 요금 {'이상 — 흑자 ✅' if bep_ok else '이하 — 손실 위험 ❌'}",
                  "#2E7D32" if bep_ok else "#C62828")
+        st.markdown(
+            '<div style="font-size:11px;color:#BBB;text-align:right;margin-top:4px;">'
+            '💡 적자 예방 최소 요금 = 운영비 + 수수료를 모두 커버하려면 1박에 최소 이 금액이 필요합니다</div>',
+            unsafe_allow_html=True,
+        )
 
         if host_type == "new":
             st.info(f"💡 신규 호스터는 실제 예약 데이터가 없어 지역 평균 예약률({b_occ:.0%})로 계산했습니다.")
 
-        # 예약률 평일/주말 분리 — 기존 호스터만 표시
+        # ── 평일 / 주말 예약률 + 수익 비교 (기존 호스터) ────────────────────
         if host_type == "existing":
             wd_occ_pct = st.session_state.get("weekday_occ_pct", 0)
             we_occ_pct = st.session_state.get("weekend_occ_pct", 0)
+            wd_booked_n = st.session_state.get("weekdays_booked", 0)
+            we_booked_n = st.session_state.get("weekends_booked", 0)
+            wd_total_n  = st.session_state.get("weekdays_total", 22)
+            we_total_n  = st.session_state.get("weekends_total", 9)
             overall_pct = int(my_occ * 100)
+
+            # 월 매출 분리
+            wd_revenue_n = my_adr * wd_booked_n
+            we_revenue_n = my_adr * we_booked_n
+            # 하루 기대 수익 (RevPAR) = 요금 × 예약률
+            wd_revpar_n = my_adr * (wd_occ_pct / 100)
+            we_revpar_n = my_adr * (we_occ_pct / 100)
+            # 색상 — 전체 대비 높으면 강조
             wd_col = "#2E7D32" if wd_occ_pct >= overall_pct else "#767676"
             we_col = "#FF5A5F" if we_occ_pct >= overall_pct else "#767676"
+
+            # 예약률 3분할 카드
             st.markdown(
-                f'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px;">'
-                f'<div style="background:white;border-radius:12px;padding:14px 10px;text-align:center;'
+                f'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px;">'
+                f'<div style="background:white;border-radius:12px;padding:14px 8px;text-align:center;'
                 f'box-shadow:0 2px 8px rgba(0,0,0,0.06);">'
                 f'<div style="font-size:11px;color:#888;margin-bottom:4px;">전체 예약률</div>'
-                f'<div style="font-size:24px;font-weight:700;color:#484848;">{overall_pct}%</div>'
-                f'<div style="font-size:11px;color:#AAA;">지역 평균 {b_occ:.0%}</div>'
+                f'<div style="font-size:22px;font-weight:700;color:#484848;">{overall_pct}%</div>'
+                f'<div style="font-size:10px;color:#AAA;">지역 평균 {b_occ:.0%}</div>'
                 f'</div>'
-                f'<div style="background:white;border-radius:12px;padding:14px 10px;text-align:center;'
+                f'<div style="background:white;border-radius:12px;padding:14px 8px;text-align:center;'
                 f'box-shadow:0 2px 8px rgba(0,0,0,0.06);">'
                 f'<div style="font-size:11px;color:#888;margin-bottom:4px;">📅 평일 예약률</div>'
-                f'<div style="font-size:24px;font-weight:700;color:{wd_col};">{wd_occ_pct}%</div>'
-                f'<div style="font-size:11px;color:#AAA;">월 ~ 금</div>'
+                f'<div style="font-size:22px;font-weight:700;color:{wd_col};">{wd_occ_pct}%</div>'
+                f'<div style="font-size:10px;color:#AAA;">{wd_booked_n}/{wd_total_n}일 (월~금)</div>'
                 f'</div>'
-                f'<div style="background:white;border-radius:12px;padding:14px 10px;text-align:center;'
+                f'<div style="background:white;border-radius:12px;padding:14px 8px;text-align:center;'
                 f'box-shadow:0 2px 8px rgba(0,0,0,0.06);">'
                 f'<div style="font-size:11px;color:#888;margin-bottom:4px;">🎉 주말 예약률</div>'
-                f'<div style="font-size:24px;font-weight:700;color:{we_col};">{we_occ_pct}%</div>'
-                f'<div style="font-size:11px;color:#AAA;">토 ~ 일</div>'
+                f'<div style="font-size:22px;font-weight:700;color:{we_col};">{we_occ_pct}%</div>'
+                f'<div style="font-size:10px;color:#AAA;">{we_booked_n}/{we_total_n}일 (토~일)</div>'
                 f'</div>'
                 f'</div>',
                 unsafe_allow_html=True,
             )
+
+            # 평일 / 주말 수익 비교 카드
+            we_higher = we_revpar_n >= wd_revpar_n
+            st.markdown(
+                f'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;">'
+                f'<div style="background:{"#F7F9FF" if not we_higher else "white"};border-radius:12px;'
+                f'padding:16px 14px;box-shadow:0 2px 8px rgba(0,0,0,0.06);'
+                f'border:{"2px solid #E3F0FF" if not we_higher else "1px solid #F0F0F0"};">'
+                f'<div style="font-size:12px;font-weight:700;color:#484848;margin-bottom:10px;">📅 평일 수익</div>'
+                f'<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #F5F5F5;">'
+                f'<span style="font-size:12px;color:#888;">하루 기대 수익</span>'
+                f'<span style="font-size:12px;font-weight:600;color:{wd_col};">₩{int(wd_revpar_n):,}</span></div>'
+                f'<div style="display:flex;justify-content:space-between;padding:5px 0;">'
+                f'<span style="font-size:12px;color:#888;">이달 평일 매출</span>'
+                f'<span style="font-size:12px;font-weight:600;color:#484848;">₩{int(wd_revenue_n):,}</span></div>'
+                f'</div>'
+                f'<div style="background:{"#FFF8F8" if we_higher else "white"};border-radius:12px;'
+                f'padding:16px 14px;box-shadow:0 2px 8px rgba(0,0,0,0.06);'
+                f'border:{"2px solid #FFCDD2" if we_higher else "1px solid #F0F0F0"};">'
+                f'<div style="font-size:12px;font-weight:700;color:#484848;margin-bottom:10px;">🎉 주말 수익</div>'
+                f'<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #F5F5F5;">'
+                f'<span style="font-size:12px;color:#888;">하루 기대 수익</span>'
+                f'<span style="font-size:12px;font-weight:600;color:{we_col};">₩{int(we_revpar_n):,}</span></div>'
+                f'<div style="display:flex;justify-content:space-between;padding:5px 0;">'
+                f'<span style="font-size:12px;color:#888;">이달 주말 매출</span>'
+                f'<span style="font-size:12px;font-weight:600;color:#484848;">₩{int(we_revenue_n):,}</span></div>'
+                f'</div>'
+                f'</div>',
+                unsafe_allow_html=True,
+            )
+            # 한 줄 인사이트
+            if we_booked_n > 0 and wd_booked_n > 0:
+                diff_pct = abs(we_revpar_n - wd_revpar_n) / max(wd_revpar_n, 1) * 100
+                if we_revpar_n > wd_revpar_n:
+                    insight = f"주말 하루 수익이 평일보다 {diff_pct:.0f}% 높습니다. 주말 요금 인상을 검토해보세요."
+                    i_color = "#FF5A5F"
+                else:
+                    insight = f"평일 하루 수익이 주말보다 {diff_pct:.0f}% 높습니다. 평일 예약 확보 전략이 효과적입니다."
+                    i_color = "#2E7D32"
+                st.markdown(
+                    f'<div style="background:#FAFAFA;border-radius:10px;padding:10px 14px;'
+                    f'margin-top:8px;border-left:3px solid {i_color};">'
+                    f'<span style="font-size:12px;color:#484848;">💬 {insight}</span></div>',
+                    unsafe_allow_html=True,
+                )
 
         st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
         section_title("💰 월 손익 계산서", "이번 달 예상 수익 구조입니다.")
