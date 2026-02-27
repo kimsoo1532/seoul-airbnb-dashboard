@@ -122,6 +122,44 @@ st.markdown("""
     min-height: 36px !important; border-radius: 8px !important;
   }
 
+  /* ── 달력 날짜 버튼 공통 ── */
+  .cal-day .stButton > button,
+  .cal-weekend-day .stButton > button,
+  .cal-holiday-day .stButton > button,
+  .cal-booked-day .stButton > button {
+    min-height: 42px !important; max-height: 42px !important;
+    font-size: 15px !important; font-weight: 500 !important;
+    padding: 4px 2px !important; border-radius: 9px !important;
+    width: 100% !important; line-height: 1 !important;
+  }
+  /* 평일 — 흰 배경, 회색 글자 */
+  .cal-day .stButton > button {
+    background: white !important; color: #484848 !important;
+    border: 1px solid #E8E8E8 !important;
+  }
+  .cal-day .stButton > button:hover {
+    background: #FFF0EE !important; border-color: #FF9B9D !important;
+    color: #FF5A5F !important;
+  }
+  /* 주말 — 흰 배경, 빨간 글자 */
+  .cal-weekend-day .stButton > button {
+    background: white !important; color: #FF5A5F !important;
+    border: 1px solid #FFD0CF !important; font-weight: 600 !important;
+  }
+  .cal-weekend-day .stButton > button:hover { background: #FFF0EE !important; }
+  /* 공휴일 — 연분홍 배경, 빨간 굵은 글자 */
+  .cal-holiday-day .stButton > button {
+    background: #FFF0EE !important; color: #FF5A5F !important;
+    border: 1px solid #FFCDD2 !important; font-weight: 700 !important;
+  }
+  .cal-holiday-day .stButton > button:hover { background: #FFD9D9 !important; }
+  /* 예약됨 — 빨간 배경, 흰 글자, 체크 */
+  .cal-booked-day .stButton > button {
+    background: #FF5A5F !important; color: white !important;
+    border: none !important; font-weight: 700 !important;
+  }
+  .cal-booked-day .stButton > button:hover { background: #E8484D !important; }
+
   /* POI 뱃지 */
   .poi-badge {
     display: inline-block; padding: 3px 10px; border-radius: 20px;
@@ -570,61 +608,98 @@ def render_calendar():
 
     # ── 요일 헤더 HTML ────────────────────────────────────────────────────────
     day_names = ["월", "화", "수", "목", "금", "토", "일"]
-    header_html = '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:4px;">'
+    header_html = (
+        '<div style="display:grid;grid-template-columns:repeat(7,1fr);'
+        'gap:4px;margin-bottom:6px;background:#F9F9F9;border-radius:10px;padding:6px 4px;">'
+    )
     for i, d in enumerate(day_names):
-        color = "#FF5A5F" if i >= 5 else "#484848"
+        color = "#FF5A5F" if i >= 5 else "#555"
         header_html += (
             f'<div style="text-align:center;font-size:12px;font-weight:700;'
-            f'color:{color};padding:4px 0;">{d}</div>'
+            f'color:{color};">{d}</div>'
         )
     header_html += "</div>"
     st.markdown(header_html, unsafe_allow_html=True)
 
-    # ── 달력 HTML (시각 표시) + 버튼 클릭 ────────────────────────────────────
+    # ── 달력 그리드 — 날짜 버튼 ──────────────────────────────────────────────
     month_cal = cal_mod.monthcalendar(year, month)
+    year_holidays = HOLIDAYS.get(year, {})
+
     for week in month_cal:
         cols = st.columns(7)
         for i, day in enumerate(week):
             if day == 0:
+                # 빈 칸 — 버튼 높이(42px) + 공휴일 텍스트 높이(16px) 맞춤
                 cols[i].markdown(
-                    '<div style="height:38px;"></div>', unsafe_allow_html=True
+                    '<div style="height:58px;"></div>', unsafe_allow_html=True
                 )
             else:
-                is_booked = day in booked
-                is_holiday = (month, day) in HOLIDAYS.get(year, {})
+                is_booked  = day in booked
+                hname      = year_holidays.get((month, day), "")
+                is_holiday = bool(hname)
+                is_weekend = i >= 5  # 토=5, 일=6
 
+                # ── 공휴일 이름 / 빈 스페이서 (버튼 위 16px 행) ──────────
+                if hname and not is_booked:
+                    short = hname if len(hname) <= 5 else hname[:4] + "…"
+                    cols[i].markdown(
+                        f'<div style="text-align:center;font-size:8px;font-weight:700;'
+                        f'color:#FF5A5F;height:16px;line-height:16px;'
+                        f'overflow:hidden;white-space:nowrap;">{short}</div>',
+                        unsafe_allow_html=True,
+                    )
+                elif is_booked and hname:
+                    # 예약+공휴일: 체크 표시
+                    cols[i].markdown(
+                        '<div style="text-align:center;font-size:9px;'
+                        'color:white;height:16px;line-height:16px;">✓</div>',
+                        unsafe_allow_html=True,
+                    )
+                else:
+                    cols[i].markdown(
+                        '<div style="height:16px;"></div>', unsafe_allow_html=True
+                    )
+
+                # ── CSS 클래스로 버튼 스타일 결정 ────────────────────────
                 if is_booked:
-                    # 예약됨 — 빨간 배경
-                    bg = "#FF5A5F"
-                    indicator = "✓"
-                    label = f"✓{day}"
+                    css_class = "cal-booked-day"
+                    label = f"✓ {day}"
                 elif is_holiday:
-                    # 공휴일 — 연한 빨강 배경
-                    bg = "#FFF0EE"
-                    indicator = "●"
+                    css_class = "cal-holiday-day"
+                    label = str(day)
+                elif is_weekend:
+                    css_class = "cal-weekend-day"
                     label = str(day)
                 else:
-                    # 일반 날짜 — 흰 배경
-                    bg = "white"
-                    indicator = "&nbsp;"
+                    css_class = "cal-day"
                     label = str(day)
 
-                hname = HOLIDAYS.get(year, {}).get((month, day), "")
-                tooltip = f'title="{hname}"' if hname else ""
-                cols[i].markdown(
-                    f'<div {tooltip} style="background:{bg};border-radius:8px;'
-                    f'text-align:center;padding:2px;margin-bottom:2px;'
-                    f'border:1px solid {"#FFCDD2" if is_holiday and not is_booked else "transparent"};">'
-                    f'<span style="font-size:10px;color:{"#FF5A5F" if is_holiday and not is_booked else "transparent"};">{indicator}</span>'
-                    f'</div>',
-                    unsafe_allow_html=True,
-                )
-                if cols[i].button(label, key=f"cal_{year}_{month}_{day}", use_container_width=True):
+                cols[i].markdown(f'<div class="{css_class}">', unsafe_allow_html=True)
+                if cols[i].button(label, key=f"cal_{year}_{month}_{day}",
+                                  use_container_width=True):
                     if day in booked:
                         st.session_state.booked_days.discard(day)
                     else:
                         st.session_state.booked_days.add(day)
                     st.rerun()
+
+    # ── 달력 범례 ─────────────────────────────────────────────────────────────
+    st.markdown("""
+    <div style="display:flex;gap:14px;margin-top:10px;flex-wrap:wrap;">
+      <span style="font-size:11px;color:#888;display:flex;align-items:center;gap:4px;">
+        <span style="display:inline-block;width:14px;height:14px;background:#FF5A5F;
+          border-radius:4px;"></span>예약됨</span>
+      <span style="font-size:11px;color:#888;display:flex;align-items:center;gap:4px;">
+        <span style="display:inline-block;width:14px;height:14px;background:#FFF0EE;
+          border:1px solid #FFCDD2;border-radius:4px;"></span>공휴일</span>
+      <span style="font-size:11px;color:#888;display:flex;align-items:center;gap:4px;">
+        <span style="display:inline-block;width:14px;height:14px;background:white;
+          border:1px solid #FFD0CF;border-radius:4px;"></span>주말</span>
+      <span style="font-size:11px;color:#888;display:flex;align-items:center;gap:4px;">
+        <span style="display:inline-block;width:14px;height:14px;background:white;
+          border:1px solid #E8E8E8;border-radius:4px;"></span>평일</span>
+    </div>
+    """, unsafe_allow_html=True)
 
     booked_count = len(booked)
     occ_rate = booked_count / days_in_month if days_in_month > 0 else 0
