@@ -122,43 +122,51 @@ st.markdown("""
     min-height: 36px !important; border-radius: 8px !important;
   }
 
-  /* ── 달력 날짜 버튼 공통 ── */
-  .cal-day .stButton > button,
-  .cal-weekend-day .stButton > button,
-  .cal-holiday-day .stButton > button,
-  .cal-booked-day .stButton > button {
-    min-height: 42px !important; max-height: 42px !important;
-    font-size: 15px !important; font-weight: 500 !important;
-    padding: 4px 2px !important; border-radius: 9px !important;
-    width: 100% !important; line-height: 1 !important;
+  /* ── iOS 스타일 달력 날짜 버튼 공통 ── */
+  .cal-weekday .stButton > button,
+  .cal-sun .stButton > button,
+  .cal-sat .stButton > button,
+  .cal-holiday .stButton > button,
+  .cal-booked .stButton > button,
+  .cal-booked-red .stButton > button,
+  .cal-booked-blue .stButton > button {
+    min-height: 44px !important; max-height: 44px !important;
+    font-size: 18px !important; font-weight: 400 !important;
+    padding: 0 4px !important; border: none !important;
+    background: transparent !important;
+    width: 100% !important; line-height: 44px !important;
+    border-radius: 22px !important;
   }
-  /* 평일 — 흰 배경, 회색 글자 */
-  .cal-day .stButton > button {
-    background: white !important; color: #484848 !important;
-    border: 1px solid #E8E8E8 !important;
+  /* 평일 (월~금) */
+  .cal-weekday .stButton > button { color: #1C1C1E !important; }
+  .cal-weekday .stButton > button:hover {
+    background: #F2F2F7 !important; color: #FF5A5F !important;
   }
-  .cal-day .stButton > button:hover {
-    background: #FFF0EE !important; border-color: #FF9B9D !important;
-    color: #FF5A5F !important;
-  }
-  /* 주말 — 흰 배경, 빨간 글자 */
-  .cal-weekend-day .stButton > button {
-    background: white !important; color: #FF5A5F !important;
-    border: 1px solid #FFD0CF !important; font-weight: 600 !important;
-  }
-  .cal-weekend-day .stButton > button:hover { background: #FFF0EE !important; }
-  /* 공휴일 — 연분홍 배경, 빨간 굵은 글자 */
-  .cal-holiday-day .stButton > button {
-    background: #FFF0EE !important; color: #FF5A5F !important;
-    border: 1px solid #FFCDD2 !important; font-weight: 700 !important;
-  }
-  .cal-holiday-day .stButton > button:hover { background: #FFD9D9 !important; }
-  /* 예약됨 — 빨간 배경, 흰 글자, 체크 */
-  .cal-booked-day .stButton > button {
+  /* 일요일 + 일요일 공휴일 → 빨간색 */
+  .cal-sun .stButton > button { color: #FF3B30 !important; }
+  .cal-sun .stButton > button:hover { background: #FFF0EE !important; }
+  /* 토요일 → 파란색 */
+  .cal-sat .stButton > button { color: #007AFF !important; }
+  .cal-sat .stButton > button:hover { background: #EEF4FF !important; }
+  /* 평일 공휴일 → 빨간색 */
+  .cal-holiday .stButton > button { color: #FF3B30 !important; font-weight: 500 !important; }
+  .cal-holiday .stButton > button:hover { background: #FFF0EE !important; }
+  /* 예약됨 (평일/공휴일) — 코랄 원형 채우기 */
+  .cal-booked .stButton > button {
     background: #FF5A5F !important; color: white !important;
-    border: none !important; font-weight: 700 !important;
+    font-weight: 700 !important;
   }
-  .cal-booked-day .stButton > button:hover { background: #E8484D !important; }
+  .cal-booked .stButton > button:hover { background: #E8484D !important; }
+  /* 예약됨 (일요일) */
+  .cal-booked-red .stButton > button {
+    background: #FF3B30 !important; color: white !important; font-weight: 700 !important;
+  }
+  .cal-booked-red .stButton > button:hover { background: #D62D20 !important; }
+  /* 예약됨 (토요일) */
+  .cal-booked-blue .stButton > button {
+    background: #007AFF !important; color: white !important; font-weight: 700 !important;
+  }
+  .cal-booked-blue .stButton > button:hover { background: #0062CC !important; }
 
   /* POI 뱃지 */
   .poi-badge {
@@ -606,76 +614,58 @@ def render_calendar():
             st.rerun()
         st.markdown("</div>", unsafe_allow_html=True)
 
-    # ── 요일 헤더 HTML ────────────────────────────────────────────────────────
-    day_names = ["월", "화", "수", "목", "금", "토", "일"]
-    header_html = (
-        '<div style="display:grid;grid-template-columns:repeat(7,1fr);'
-        'gap:4px;margin-bottom:6px;background:#F9F9F9;border-radius:10px;padding:6px 4px;">'
-    )
-    for i, d in enumerate(day_names):
-        color = "#FF5A5F" if i >= 5 else "#555"
+    # ── 요일 헤더 — 일요일 먼저 (iOS 스타일) ────────────────────────────────
+    # 일=빨강, 토=파랑, 평일=진회색
+    DAY_NAMES   = ["일", "월", "화", "수", "목", "금", "토"]
+    DAY_COLORS  = ["#FF3B30", "#333", "#333", "#333", "#333", "#333", "#007AFF"]
+    header_html = '<div style="display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:4px;">'
+    for d, c in zip(DAY_NAMES, DAY_COLORS):
         header_html += (
-            f'<div style="text-align:center;font-size:12px;font-weight:700;'
-            f'color:{color};">{d}</div>'
+            f'<div style="text-align:center;font-size:13px;font-weight:600;'
+            f'color:{c};padding:8px 0 4px;">{d}</div>'
         )
     header_html += "</div>"
+    # 구분선
+    header_html += '<div style="border-top:1px solid #E5E5EA;margin-bottom:4px;"></div>'
     st.markdown(header_html, unsafe_allow_html=True)
 
-    # ── 달력 그리드 — 날짜 버튼 ──────────────────────────────────────────────
+    # ── 달력 그리드 — 일요일 시작 ────────────────────────────────────────────
+    cal_mod.setfirstweekday(6)   # 6 = Sunday first
     month_cal = cal_mod.monthcalendar(year, month)
+    cal_mod.setfirstweekday(0)   # 원상복구 (Monday)
     year_holidays = HOLIDAYS.get(year, {})
 
-    for week in month_cal:
+    for w_idx, week in enumerate(month_cal):
         cols = st.columns(7)
         for i, day in enumerate(week):
+            # i=0 → 일요일, i=6 → 토요일
+            is_sunday   = (i == 0)
+            is_saturday = (i == 6)
+
             if day == 0:
-                # 빈 칸 — 버튼 높이(42px) + 공휴일 텍스트 높이(16px) 맞춤
-                cols[i].markdown(
-                    '<div style="height:58px;"></div>', unsafe_allow_html=True
-                )
+                # 빈 칸 — 버튼(44px) + 공휴일 텍스트(15px) 합계 높이 맞춤
+                cols[i].markdown('<div style="height:59px;"></div>', unsafe_allow_html=True)
             else:
                 is_booked  = day in booked
                 hname      = year_holidays.get((month, day), "")
                 is_holiday = bool(hname)
-                is_weekend = i >= 5  # 토=5, 일=6
 
-                # ── 공휴일 이름 / 빈 스페이서 (버튼 위 16px 행) ──────────
-                if hname and not is_booked:
-                    short = hname if len(hname) <= 5 else hname[:4] + "…"
-                    cols[i].markdown(
-                        f'<div style="text-align:center;font-size:8px;font-weight:700;'
-                        f'color:#FF5A5F;height:16px;line-height:16px;'
-                        f'overflow:hidden;white-space:nowrap;">{short}</div>',
-                        unsafe_allow_html=True,
-                    )
-                elif is_booked and hname:
-                    # 예약+공휴일: 체크 표시
-                    cols[i].markdown(
-                        '<div style="text-align:center;font-size:9px;'
-                        'color:white;height:16px;line-height:16px;">✓</div>',
-                        unsafe_allow_html=True,
-                    )
-                else:
-                    cols[i].markdown(
-                        '<div style="height:16px;"></div>', unsafe_allow_html=True
-                    )
-
-                # ── CSS 클래스로 버튼 스타일 결정 ────────────────────────
+                # ── CSS 클래스 결정 (우선순위: 예약 > 요일/공휴일) ────────
                 if is_booked:
-                    css_class = "cal-booked-day"
-                    label = f"✓ {day}"
+                    css_class = "cal-booked-red" if is_sunday else (
+                                "cal-booked-blue" if is_saturday else "cal-booked")
+                elif is_sunday or (is_holiday and is_sunday):
+                    css_class = "cal-sun"
+                elif is_saturday:
+                    css_class = "cal-sat"
                 elif is_holiday:
-                    css_class = "cal-holiday-day"
-                    label = str(day)
-                elif is_weekend:
-                    css_class = "cal-weekend-day"
-                    label = str(day)
+                    css_class = "cal-holiday"
                 else:
-                    css_class = "cal-day"
-                    label = str(day)
+                    css_class = "cal-weekday"
 
+                # ── 버튼 (날짜 숫자만) ────────────────────────────────────
                 cols[i].markdown(f'<div class="{css_class}">', unsafe_allow_html=True)
-                if cols[i].button(label, key=f"cal_{year}_{month}_{day}",
+                if cols[i].button(str(day), key=f"cal_{year}_{month}_{day}",
                                   use_container_width=True):
                     if day in booked:
                         st.session_state.booked_days.discard(day)
@@ -683,21 +673,35 @@ def render_calendar():
                         st.session_state.booked_days.add(day)
                     st.rerun()
 
+                # ── 공휴일 이름 (버튼 아래, 15px 고정 행) ────────────────
+                if hname:
+                    hcolor = "white" if is_booked else "#FF3B30"
+                    short  = hname if len(hname) <= 5 else hname[:4] + "…"
+                    cols[i].markdown(
+                        f'<div style="text-align:center;font-size:9px;font-weight:600;'
+                        f'color:{hcolor};height:15px;line-height:15px;'
+                        f'overflow:hidden;white-space:nowrap;">{short}</div>',
+                        unsafe_allow_html=True,
+                    )
+                else:
+                    cols[i].markdown('<div style="height:15px;"></div>', unsafe_allow_html=True)
+
+        # 주 구분선 (마지막 주 제외)
+        if w_idx < len(month_cal) - 1:
+            st.markdown(
+                '<div style="border-top:1px solid #F0F0F0;margin:2px 0 4px;"></div>',
+                unsafe_allow_html=True,
+            )
+
     # ── 달력 범례 ─────────────────────────────────────────────────────────────
     st.markdown("""
-    <div style="display:flex;gap:14px;margin-top:10px;flex-wrap:wrap;">
-      <span style="font-size:11px;color:#888;display:flex;align-items:center;gap:4px;">
-        <span style="display:inline-block;width:14px;height:14px;background:#FF5A5F;
-          border-radius:4px;"></span>예약됨</span>
-      <span style="font-size:11px;color:#888;display:flex;align-items:center;gap:4px;">
-        <span style="display:inline-block;width:14px;height:14px;background:#FFF0EE;
-          border:1px solid #FFCDD2;border-radius:4px;"></span>공휴일</span>
-      <span style="font-size:11px;color:#888;display:flex;align-items:center;gap:4px;">
-        <span style="display:inline-block;width:14px;height:14px;background:white;
-          border:1px solid #FFD0CF;border-radius:4px;"></span>주말</span>
-      <span style="font-size:11px;color:#888;display:flex;align-items:center;gap:4px;">
-        <span style="display:inline-block;width:14px;height:14px;background:white;
-          border:1px solid #E8E8E8;border-radius:4px;"></span>평일</span>
+    <div style="display:flex;gap:16px;margin-top:10px;flex-wrap:wrap;align-items:center;">
+      <span style="font-size:11px;color:#888;display:flex;align-items:center;gap:5px;">
+        <span style="display:inline-block;width:16px;height:16px;background:#FF5A5F;
+          border-radius:50%;"></span>예약됨</span>
+      <span style="font-size:11px;color:#FF3B30;font-weight:600;">일 = 일요일</span>
+      <span style="font-size:11px;color:#007AFF;font-weight:600;">토 = 토요일</span>
+      <span style="font-size:11px;color:#FF3B30;">빨간 숫자 = 공휴일</span>
     </div>
     """, unsafe_allow_html=True)
 
