@@ -1,0 +1,60 @@
+{
+  "FEATURES_A": [
+    "cluster",
+    "nearest_poi_dist_km",
+    "poi_dist_category",
+    "bedrooms",
+    "baths",
+    "guests",
+    "room_type",
+    "nearest_poi_type_name",
+    "district_median_revpar",
+    "district_listing_count",
+    "district_superhost_rate",
+    "district_entire_home_rate",
+    "ttm_pop"
+  ],
+  "FEATURES_B_BASE": [
+    "min_nights",
+    "instant_book",
+    "superhost",
+    "rating_overall",
+    "photos_count",
+    "num_reviews",
+    "extra_guest_fee_policy",
+    "photos_tier",
+    "cluster",
+    "room_type",
+    "is_active_operating",
+    "photos_rel_dist",
+    "rating_rel_dist",
+    "reviews_rel_dist",
+    "min_nights_rel_dist"
+  ],
+  "FEATURES_B_FULL": [
+    "min_nights",
+    "instant_book",
+    "superhost",
+    "rating_overall",
+    "photos_count",
+    "num_reviews",
+    "extra_guest_fee_policy",
+    "photos_tier",
+    "cluster",
+    "room_type",
+    "is_active_operating",
+    "photos_rel_dist",
+    "rating_rel_dist",
+    "reviews_rel_dist",
+    "min_nights_rel_dist",
+    "price_gap_oof"
+  ],
+  "categorical_cols": [
+    "room_type",
+    "nearest_poi_type_name",
+    "poi_dist_category",
+    "extra_guest_fee_policy",
+    "photos_tier"
+  ],
+  "revpar_trend_formula": "(l90d_revpar - ttm_revpar/4) / (ttm_revpar/4 + 1e-6)"
+}

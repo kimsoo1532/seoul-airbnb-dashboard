@@ -966,17 +966,20 @@ def step2_new():
     r2c1, r2c2, r2c3, r2c4 = st.columns(4)
 
     with r2c1:
-        default_g = int(st.session_state.my_guests) if st.session_state.my_guests else int(bench_val(bench, "guests", 2))
+        _raw_g = st.session_state.my_guests
+        default_g = max(1, int(_raw_g) if _raw_g is not None else int(bench_val(bench, "guests", 2)))
         my_guests = st.number_input("👥 최대 숙박 인원", 1, 20, default_g)
         st.session_state.my_guests = my_guests
 
     with r2c2:
-        default_br = int(st.session_state.my_bedrooms) if st.session_state.my_bedrooms else int(bench_val(bench, "bedrooms", 1))
+        _raw_br = st.session_state.my_bedrooms
+        default_br = max(1, int(_raw_br) if _raw_br is not None else int(bench_val(bench, "bedrooms", 1)))
         my_bedrooms = st.number_input("🛏️ 침실 수", 0, 20, default_br)
         st.session_state.my_bedrooms = my_bedrooms
 
     with r2c3:
-        default_bt = int(st.session_state.my_baths_count) if st.session_state.my_baths_count else int(bench_val(bench, "baths", 1))
+        _raw_bt = st.session_state.my_baths_count
+        default_bt = max(1, int(_raw_bt) if _raw_bt is not None else int(bench_val(bench, "baths", 1)))
         my_baths = st.number_input("🚿 욕실 수", 0, 10, default_bt)
         st.session_state.my_baths_count = my_baths
 
