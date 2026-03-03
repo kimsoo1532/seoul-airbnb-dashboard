@@ -1471,13 +1471,50 @@ def step5():
         _hs_ok = False
         _hs    = {}
 
-    st.markdown(f"""
+    st.markdown("""
     <div style="text-align:center;padding:20px 0 4px;">
       <div style="font-size:34px;">🏠</div>
       <h2 style="color:#FF5A5F;margin:6px 0 2px;font-weight:800;">분석 결과</h2>
-      <p style="color:#888;font-size:13px;margin:0;">
-        {d_name} · {rt_name} · 실운영 {len(bench):,}개 기준 · {host_badge}
-      </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # ── 분석 요약 카드 (탭 상단) ─────────────────────────────────────────────
+    _revpar_diff_s = my_revpar - b_revpar
+    _diff_arrow    = "▲" if _revpar_diff_s >= 0 else "▼"
+    _diff_color    = "#2E7D32" if _revpar_diff_s >= 0 else "#C62828"
+    _profit_label  = "흑자" if net_profit >= 0 else "적자"
+    _profit_color  = "#2E7D32" if net_profit >= 0 else "#C62828"
+    st.markdown(f"""
+    <div style="background:white;border-radius:14px;padding:16px 22px;
+      box-shadow:0 2px 12px rgba(0,0,0,0.07);margin:8px 0 16px;
+      border-left:4px solid #FF5A5F;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+        <span style="background:#FFF0EE;color:#FF5A5F;font-size:12px;font-weight:700;
+          padding:3px 10px;border-radius:20px;">📍 {d_name}</span>
+        <span style="background:#F5F5F5;color:#484848;font-size:12px;font-weight:600;
+          padding:3px 10px;border-radius:20px;">{ROOM_TYPE_ICONS.get(room_type,"")} {rt_name}</span>
+        <span style="background:#F5F5F5;color:#767676;font-size:12px;
+          padding:3px 10px;border-radius:20px;">실운영 {len(bench):,}개 기준</span>
+        <span style="background:#FFF0EE;color:#FF5A5F;font-size:12px;font-weight:600;
+          padding:3px 10px;border-radius:20px;">{host_badge}</span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
+        <div style="text-align:center;">
+          <div style="font-size:11px;color:#888;margin-bottom:3px;">하루 실수익 (1박 요금×예약률)</div>
+          <div style="font-size:20px;font-weight:700;color:#FF5A5F;">₩{int(my_revpar):,}</div>
+          <div style="font-size:10px;color:{_diff_color};">{_diff_arrow} 지역 평균 대비 ₩{int(abs(_revpar_diff_s)):,}</div>
+        </div>
+        <div style="text-align:center;border-left:1px solid #F0F0F0;border-right:1px solid #F0F0F0;">
+          <div style="font-size:11px;color:#888;margin-bottom:3px;">월 예상 순이익</div>
+          <div style="font-size:20px;font-weight:700;color:{_profit_color};">₩{int(net_profit):,}</div>
+          <div style="font-size:10px;color:{_profit_color};">{_profit_label}</div>
+        </div>
+        <div style="text-align:center;">
+          <div style="font-size:11px;color:#888;margin-bottom:3px;">시장 유형</div>
+          <div style="font-size:14px;font-weight:700;color:{c_info['color']};">{c_info['emoji']} {cluster_name}</div>
+          <div style="font-size:10px;color:#888;">가격 탄력성 {abs(elasticity):.1f}</div>
+        </div>
+      </div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -1485,15 +1522,14 @@ def step5():
     st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
 
     if host_type == "existing":
-        tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
+        tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
             "📊 수익 요약", "💡 요금 전략", "📍 주변 관광지",
-            "📋 운영 개선", "🏙️ 지역 진단", "🩺 헬스 스코어"
+            "📋 운영 개선", "🏙️ 지역 진단", "🩺 헬스 스코어", "✍️ 숙소 설명"
         ])
     else:
-        tab1, tab2, tab3, tab4 = st.tabs([
-            "📊 수익 요약", "💡 요금 추천", "📍 주변 관광지", "🏙️ 지역 진단"
+        tab1, tab2, tab3, tab4, tab5 = st.tabs([
+            "📊 수익 요약", "💡 요금 추천", "📍 주변 관광지", "🏙️ 지역 진단", "✍️ 숙소 설명"
         ])
-        tab5 = None
         tab6 = None
 
     # ── TAB 1: 수익 요약 (KPI + 손익계산서) ─────────────────────────────────
@@ -1667,12 +1703,12 @@ def step5():
             else:
                 st.info("운영비를 입력하면 구성 차트가 표시됩니다.")
 
-        # ── ML 시장 예측 섹션 ────────────────────────────────────────────────
+        # ── AI 시장 예측 섹션 ────────────────────────────────────────────────
         if _ml_ok:
             st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
             section_title(
-                "🤖 ML 시장 예측",
-                "서울 실운영 14,399개 리스팅 학습 모델(LightGBM) 기반 시장 적정값입니다.",
+                "🤖 AI 시장 예측",
+                "서울 실운영 14,399개 리스팅을 학습한 AI 모델 기반 시장 적정값입니다.",
             )
             mc1, mc2, mc3 = st.columns(3)
 
@@ -1680,28 +1716,28 @@ def step5():
             occ_diff   = _ml["Occ_pred"]   - my_occ
             revp_diff  = _ml["RevPAR_pred"] - my_revpar
 
-            kpi_card(mc1, "ML 적정 ADR",
+            kpi_card(mc1, "AI 추천 1박 요금",
                      f"₩{int(_ml['ADR_pred']):,}",
                      f"{'▲' if adr_diff >= 0 else '▼'} 내 요금 대비 ₩{int(abs(adr_diff)):,}",
                      "#2E7D32" if adr_diff >= 0 else "#C62828")
-            kpi_card(mc2, "ML 예측 예약률",
+            kpi_card(mc2, "AI 예측 예약률",
                      f"{_ml['Occ_pred']:.1%}",
                      f"{'▲' if occ_diff >= 0 else '▼'} 내 예약률 대비 {abs(occ_diff)*100:.1f}%p",
                      "#2E7D32" if occ_diff >= 0 else "#C62828")
-            kpi_card(mc3, "ML 예측 RevPAR",
+            kpi_card(mc3, "AI 예측 하루 실수익",
                      f"₩{int(_ml['RevPAR_pred']):,}",
                      f"{'▲' if revp_diff >= 0 else '▼'} 현재 대비 ₩{int(abs(revp_diff)):,}",
                      "#2E7D32" if revp_diff >= 0 else "#C62828")
 
-            # 월 수익 + 순이익 (ML 기준)
+            # 월 수익 + 순이익 (AI 기준)
             ml_net = _ml["net_profit"]
             ml_net_color = "#2E7D32" if ml_net >= 0 else "#C62828"
             st.markdown(
                 f'<div style="background:#F9F9F9;border-radius:12px;padding:14px 20px;'
                 f'margin-top:10px;display:flex;gap:28px;flex-wrap:wrap;">'
-                f'<span style="font-size:13px;color:#767676;">ML 기준 월 예상 수익: '
+                f'<span style="font-size:13px;color:#767676;">AI 기준 월 예상 수익: '
                 f'<b style="color:#484848;">₩{int(_ml["monthly_revenue"]):,}</b></span>'
-                f'<span style="font-size:13px;color:#767676;">ML 기준 월 순이익: '
+                f'<span style="font-size:13px;color:#767676;">AI 기준 월 순이익: '
                 f'<b style="color:{ml_net_color};">₩{int(ml_net):,}</b></span>'
                 f'<span style="font-size:11px;color:#AAAAAA;align-self:center;">'
                 f'운영비 ₩{int(total_opex):,} 반영</span>'
@@ -2001,6 +2037,94 @@ def step5():
                         unsafe_allow_html=True,
                     )
 
+    # ── 숙소 설명 탭 렌더링 함수 ────────────────────────────────────────────
+    def _render_description_tab():
+        _room_style = st.session_state.get("my_room_style", "모던/미니멀")
+        _guests   = int(st.session_state.my_guests   or 2)
+        _bedrooms = int(st.session_state.my_bedrooms or 1)
+        _baths    = float(st.session_state.my_baths_count or 1)
+        _beds     = int(st.session_state.my_beds or 1)
+
+        section_title(
+            "✍️ 숙소 설명 생성",
+            "내 숙소 유형에 맞는 설명 템플릿입니다. [직접 입력] 부분을 채워 완성하세요.",
+        )
+
+        _style_adj = {
+            "모던/미니멀": "깔끔하고 심플한 모던",
+            "빈티지/레트로": "감성적인 빈티지",
+            "한옥/전통": "한국 전통 감성이 살아있는",
+            "아늑/가정적": "따뜻하고 아늑한",
+            "럭셔리/프리미엄": "고급스러운 프리미엄",
+        }.get(_room_style, "세련된")
+
+        if room_type == "entire_home":
+            _privacy = "숙소 전체를 단독으로 사용하실 수 있어 프라이빗한 공간이 필요하신 분께 적합합니다."
+            _space   = f"침실 {_bedrooms}개, 욕실 {int(_baths)}개로 구성된 집 전체입니다."
+            _intro   = f"{_style_adj} 감성의 {d_name} 집 전체를 단독으로 즐겨보세요."
+        elif room_type == "private_room":
+            _privacy = "침실은 단독으로 사용하시고, 거실·주방·욕실은 다른 게스트와 함께 이용합니다."
+            _space   = "개인 침실을 단독으로 이용하시며, 그 외 공간은 공용입니다."
+            _intro   = f"{_style_adj} 분위기의 {d_name} 개인실에서 편안하게 머무르세요."
+        elif room_type == "hotel_room":
+            _privacy = "호텔 수준의 서비스와 편의시설을 갖춘 독립 객실입니다."
+            _space   = "객실 내 침실과 욕실이 완비되어 있습니다."
+            _intro   = f"{d_name}에 위치한 {_style_adj} 호텔 스타일 객실입니다."
+        else:
+            _privacy = "합리적인 가격으로 서울을 여행하시는 분께 적합한 다인실입니다."
+            _space   = "침대와 기본 수납공간이 제공됩니다."
+            _intro   = f"{d_name}의 {_style_adj} 다인실에서 새로운 여행자들을 만나보세요."
+
+        template = f"""◼ 숙소 소개
+{_intro} [가까운 지하철역 또는 주요 명소 — 직접 입력: 예) 홍대입구역 도보 5분 거리에 위치하여] 서울 주요 지역으로의 이동이 편리합니다.
+{_privacy}
+
+[숙소만의 특별한 포인트 — 직접 입력: 예) 통창으로 들어오는 자연광, 루프탑 테라스, 한강 뷰 등]
+
+◼ 숙소 구성
+최대 {_guests}명 이용 가능 · {_space}
+
+침실에는 [침대 종류 — 직접 입력: 예) 킹사이즈 침대 / 더블베드 / 싱글 침대 {_beds}개]이 갖춰져 있으며, [주요 가전·가구 — 직접 입력: 예) 에어컨, 난방, TV, 냉장고, 전자레인지, 세탁기, 드레스룸]가 제공됩니다.
+
+◼ 기본 제공 어메니티
+[직접 입력: 예) 수건, 헤어드라이기, 샴푸, 컨디셔너, 바디워시, 핸드워시, 비누, 티슈, 슬리퍼]가 기본으로 제공됩니다.
+[별도 준비 필요 항목 — 직접 입력: 예) 칫솔·치약은 개별적으로 준비해주시기 바랍니다.]
+
+◼ 체크인 / 체크아웃
+체크인: [직접 입력: 예) 15:00 이후] / 체크아웃: [직접 입력: 예) 11:00 이전]
+[입실 방법 — 직접 입력: 예) 도어락으로 키 없이 입실 가능합니다. 예약 확정 후 비밀번호를 안내드립니다.]
+
+◼ 주의사항
+[직접 입력: 예) 금연 / 반려동물 동반 불가 / 파티·행사 불가 / 층간소음 주의 / 쓰레기 분리수거 안내]"""
+
+        st.markdown(
+            '<div style="background:#FFF9F7;border:1.5px solid #FFD0CF;border-radius:12px;'
+            'padding:14px 18px;margin-bottom:14px;font-size:13px;color:#484848;line-height:1.7;">'
+            '💡 <b>사용 방법</b>: 아래 텍스트를 복사해 에어비앤비 숙소 설명란에 붙여넣은 뒤, '
+            '<span style="color:#FF5A5F;font-weight:700;">[직접 입력]</span> 부분을 '
+            '내 숙소 상황에 맞게 직접 수정해주세요. '
+            '가구·가전·어메니티는 실제 보유 여부를 확인 후 작성해야 합니다.'
+            '</div>',
+            unsafe_allow_html=True,
+        )
+
+        st.text_area(
+            "숙소 설명 템플릿 (복사 후 수정하여 사용)",
+            value=template,
+            height=430,
+            key="desc_template_area",
+        )
+
+        coral_box(
+            '<div style="font-size:13px;line-height:1.8;">'
+            '📌 <b>설명 작성 꿀팁</b><br>'
+            '• <b>첫 문장</b>이 검색 결과 미리보기로 노출됩니다. 가장 매력적인 포인트를 먼저 쓰세요.<br>'
+            '• <b>지하철역·버스 정류장</b> 이름과 도보 시간을 구체적으로 명시하면 예약률이 높아집니다.<br>'
+            '• <b>어메니티 목록</b>은 구체적일수록 좋습니다. 없는 항목을 적으면 나중에 분쟁 원인이 됩니다.<br>'
+            '• <b>주의사항</b>은 명확하게 적어야 불필요한 환불 요청을 예방할 수 있습니다.'
+            '</div>'
+        )
+
     if host_type == "existing":
         with tab4:
             section_title("📋 지금 바로 개선할 수 있는 것들")
@@ -2075,6 +2199,9 @@ def step5():
                 st.success("🎉 모든 운영 레버가 최적 상태입니다!")
 
         _render_market_tab(tab5)
+
+        with tab7:
+            _render_description_tab()
 
         # ── TAB 6: 헬스 스코어 (기존 호스터) ────────────────────────────────
         with tab6:
@@ -2152,6 +2279,8 @@ def step5():
 
     else:
         _render_market_tab(tab4)
+        with tab5:
+            _render_description_tab()
 
     # ── 다시 시작 ────────────────────────────────────────────────────────────
     st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
