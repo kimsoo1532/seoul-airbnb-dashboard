@@ -1498,9 +1498,14 @@ def step5():
         <span style="background:#FFF0EE;color:#FF5A5F;font-size:12px;font-weight:600;
           padding:3px 10px;border-radius:20px;">{host_badge}</span>
       </div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">
         <div style="text-align:center;">
-          <div style="font-size:11px;color:#888;margin-bottom:3px;">하루 실수익 (1박 요금×예약률)</div>
+          <div style="font-size:11px;color:#888;margin-bottom:3px;">현재 1박 요금</div>
+          <div style="font-size:20px;font-weight:700;color:#484848;">₩{int(my_adr):,}</div>
+          <div style="font-size:10px;color:#888;">{rt_name} 기준</div>
+        </div>
+        <div style="text-align:center;border-left:1px solid #F0F0F0;">
+          <div style="font-size:11px;color:#888;margin-bottom:3px;">하루 실수익 (요금×예약률)</div>
           <div style="font-size:20px;font-weight:700;color:#FF5A5F;">₩{int(my_revpar):,}</div>
           <div style="font-size:10px;color:{_diff_color};">{_diff_arrow} 지역 평균 대비 ₩{int(abs(_revpar_diff_s)):,}</div>
         </div>
@@ -1512,7 +1517,7 @@ def step5():
         <div style="text-align:center;">
           <div style="font-size:11px;color:#888;margin-bottom:3px;">시장 유형</div>
           <div style="font-size:14px;font-weight:700;color:{c_info['color']};">{c_info['emoji']} {cluster_name}</div>
-          <div style="font-size:10px;color:#888;">가격 탄력성 {abs(elasticity):.1f}</div>
+          <div style="font-size:10px;color:#888;">탄력성 {abs(elasticity):.1f}</div>
         </div>
       </div>
     </div>
@@ -1750,59 +1755,51 @@ def step5():
         section_title("💡 내 숙소에 맞는 적정 요금")
 
         if my_superhost and my_rating >= 4.8 and my_reviews >= 50:
-            stage, s_color, s_icon = "프리미엄", "#FF5A5F", "🏆"
+            s_color = "#FF5A5F"
             rec_min, rec_max = int(b_adr), int(b_adr_p75)
             s_tip = "현재 요금이 지역 평균보다 낮다면 10~20% 인상을 테스트해보세요."
         elif my_reviews >= 10 and my_rating >= 4.5:
-            stage, s_color, s_icon = "안정", "#00A699", "📈"
+            s_color = "#00A699"
             rec_min, rec_max = int(b_adr_p25), int(b_adr)
             s_tip = "슈퍼호스트 달성 후 요금을 지역 평균 이상으로 올릴 수 있습니다."
         else:
-            stage, s_color, s_icon = "신규", "#2196F3", "🌱"
+            s_color = "#2196F3"
             rec_min = max(int(bep_adr), int(b_adr_p25 * 0.85))
             rec_max = int(b_adr_p25)
             s_tip = "하위 25% 요금으로 첫 10건의 리뷰를 빠르게 쌓은 후 요금을 올리세요."
 
-        t1, t2, t3 = st.columns(3)
-        stage_data = [
-            ("신규", "🌱", "#2196F3", f"₩{int(b_adr_p25*0.85):,} ~ ₩{int(b_adr_p25):,}", "리뷰 10건 미만"),
-            ("안정", "📈", "#00A699", f"₩{int(b_adr_p25):,} ~ ₩{int(b_adr):,}", "리뷰 10건+ & 평점 4.5+"),
-            ("프리미엄", "🏆", "#FF5A5F", f"₩{int(b_adr):,} ~ ₩{int(b_adr_p75):,}", "슈퍼호스트 & 평점 4.8+"),
-        ]
-        for col, (sname, sicon, scolor, sprice, scond) in zip([t1, t2, t3], stage_data):
-            is_me = sname == stage
-            bg    = scolor if is_me else "#F7F7F7"
-            fc    = "white" if is_me else "#767676"
-            border = f"3px solid {scolor}" if is_me else "2px solid #EBEBEB"
-            me_tag = (f'<div style="margin-top:8px;"><span style="background:white;color:{scolor};'
-                      f'padding:2px 10px;border-radius:20px;font-size:11px;font-weight:700;">▲ 내 단계</span></div>'
-                      if is_me else "")
-            col.markdown(
-                f'<div style="border:{border};border-radius:12px;padding:18px;text-align:center;background:{bg};color:{fc};">'
-                f'<div style="font-size:22px;">{sicon}</div>'
-                f'<div style="font-weight:700;font-size:14px;margin:6px 0;">{sname} 호스트</div>'
-                f'<div style="font-size:11px;opacity:0.85;margin-bottom:8px;">{scond}</div>'
-                f'<div style="font-size:15px;font-weight:700;">{sprice}</div>'
-                f'{me_tag}</div>',
-                unsafe_allow_html=True,
-            )
+        # ── 단일 적정 요금 카드 ──────────────────────────────────────────────
+        st.markdown(
+            f'<div style="background:white;border:2px solid {s_color};border-radius:16px;'
+            f'padding:28px 24px;text-align:center;margin-bottom:16px;'
+            f'box-shadow:0 3px 16px rgba(0,0,0,0.07);">'
+            f'<div style="font-size:12px;color:#888;margin-bottom:8px;">'
+            f'📊 {d_name} {rt_name} · 실운영 {len(bench):,}개 데이터 기반</div>'
+            f'<div style="font-size:14px;font-weight:700;color:#484848;margin-bottom:10px;">내 숙소 적정 1박 요금</div>'
+            f'<div style="font-size:40px;font-weight:800;color:{s_color};letter-spacing:-1px;">'
+            f'₩{rec_min:,} ~ ₩{rec_max:,}</div>'
+            f'<div style="display:flex;justify-content:center;gap:18px;margin-top:14px;flex-wrap:wrap;">'
+            f'<span style="font-size:11px;color:#AAA;">🔴 본전 ₩{int(bep_adr):,}</span>'
+            f'<span style="font-size:11px;color:#AAA;">하위25% ₩{int(b_adr_p25):,}</span>'
+            f'<span style="font-size:11px;color:#AAA;">지역 평균 ₩{int(b_adr):,}</span>'
+            f'<span style="font-size:11px;color:#AAA;">상위25% ₩{int(b_adr_p75):,}</span>'
+            f'</div>'
+            f'</div>',
+            unsafe_allow_html=True,
+        )
 
-        st.markdown("<br>", unsafe_allow_html=True)
         if my_adr < rec_min:
-            gap_msg, gap_icon, gap_bg = (f"현재 요금 ₩{int(my_adr):,}이 추천 구간보다 ₩{rec_min - int(my_adr):,} 낮습니다.", "⬆️", "#E3F2FD")
+            gap_msg, gap_icon, gap_bg = (f"현재 요금 ₩{int(my_adr):,}이 적정 구간보다 ₩{rec_min - int(my_adr):,} 낮습니다.", "⬆️", "#E3F2FD")
         elif my_adr > rec_max:
-            gap_msg, gap_icon, gap_bg = (f"현재 요금 ₩{int(my_adr):,}이 추천 구간보다 ₩{int(my_adr) - rec_max:,} 높습니다.", "⚠️", "#FFF8E1")
+            gap_msg, gap_icon, gap_bg = (f"현재 요금 ₩{int(my_adr):,}이 적정 구간보다 ₩{int(my_adr) - rec_max:,} 높습니다.", "⚠️", "#FFF8E1")
         else:
-            gap_msg, gap_icon, gap_bg = ("현재 요금이 내 단계에 맞는 구간 안에 있습니다. 잘 하고 계세요!", "✅", "#E8F5E9")
+            gap_msg, gap_icon, gap_bg = ("현재 요금이 적정 구간 안에 있습니다. 잘 하고 계세요!", "✅", "#E8F5E9")
 
         st.markdown(
             f'<div style="background:{gap_bg};border-left:4px solid {s_color};border-radius:10px;padding:16px 18px;">'
-            f'<div style="font-weight:700;color:{s_color};margin-bottom:6px;">{s_icon} {stage} 호스터 — 추천 요금 ₩{rec_min:,} ~ ₩{rec_max:,}</div>'
-            f'<div style="font-size:13px;color:#484848;">{gap_icon} {gap_msg}</div>'
-            f'<div style="font-size:12px;color:#767676;margin-top:6px;">💬 {s_tip}</div>'
-            f'<div style="font-size:11px;color:#AAAAAA;margin-top:8px;">'
-            f'본전 ₩{int(bep_adr):,} | 하위25% ₩{int(b_adr_p25):,} | 평균 ₩{int(b_adr):,} | 상위25% ₩{int(b_adr_p75):,}'
-            f'</div></div>',
+            f'<div style="font-size:13px;color:#484848;font-weight:600;margin-bottom:4px;">{gap_icon} {gap_msg}</div>'
+            f'<div style="font-size:12px;color:#767676;margin-top:4px;">💬 {s_tip}</div>'
+            f'</div>',
             unsafe_allow_html=True,
         )
 
