@@ -227,6 +227,18 @@ st.markdown("""
   }
   .rt-selected, .rt-unselected { margin-bottom: -6px; }
 
+  /* 숙소 종류 컬럼 — 자치구 선택과 상단 정렬 */
+  [data-testid="stColumn"]:has(.rt-col-anchor) > [data-testid="stVerticalBlock"] {
+    margin-top: -10px !important;
+  }
+
+  /* 인테리어 스타일 선택 버튼 — 소형 */
+  .style-sel-btn .stButton > button {
+    min-height: 28px !important; max-height: 28px !important;
+    padding: 2px 6px !important; font-size: 11px !important;
+    font-weight: 500 !important;
+  }
+
   /* 히어로 섹션 */
   .hero-section {
     background: linear-gradient(135deg, #FF5A5F 0%, #E8484D 60%, #C62828 100%);
@@ -805,7 +817,7 @@ def step1():
 
     with col2:
         st.markdown(
-            '<div style="font-weight:600;font-size:14px;margin-bottom:6px;">🏠 숙소 종류</div>',
+            '<div class="rt-col-anchor" style="font-weight:600;font-size:14px;margin-bottom:6px;">🏠 숙소 종류</div>',
             unsafe_allow_html=True,
         )
         room_types = ["entire_home", "private_room", "hotel_room", "shared_room"]
@@ -970,9 +982,9 @@ def step2_new():
             f'</div>',
             unsafe_allow_html=True,
         )
-        # 선택 버튼 — 높이 최소화
+        # 선택 버튼 — 소형
         style_cols[i].markdown(
-            '<div style="margin-top:-6px;">',
+            '<div class="style-sel-btn" style="margin-top:-6px;">',
             unsafe_allow_html=True,
         )
         if style_cols[i].button("선택" if not is_sel else "✓", key=f"style_{i}", use_container_width=True):
@@ -1060,18 +1072,6 @@ def step2_existing():
 
     bench = get_bench(st.session_state.district, st.session_state.room_type)
     b_adr = bench_val(bench, "ttm_avg_rate", 100000)
-    b_occ = bench_val(bench, "ttm_occupancy", 0.40)
-    d_name = dn(st.session_state.district)
-    rt_name = ROOM_TYPE_KR.get(st.session_state.room_type, "")
-
-    st.markdown(
-        f'<div style="background:#F7F7F7;border-radius:10px;padding:12px 18px;margin-bottom:16px;">'
-        f'<span style="font-size:13px;font-weight:600;color:#484848;">📊 {d_name} {rt_name} — 지역 평균</span><br>'
-        f'<span style="font-size:13px;color:#767676;">'
-        f'평균 1박 요금 <b>₩{int(b_adr):,}</b> &nbsp;|&nbsp; 평균 예약률 <b>{b_occ:.0%}</b>'
-        f'</span></div>',
-        unsafe_allow_html=True,
-    )
 
     # ── 1박 요금 ─────────────────────────────────────────────────────────────
     default_adr = int(st.session_state.my_adr) if st.session_state.my_adr else int(b_adr)
