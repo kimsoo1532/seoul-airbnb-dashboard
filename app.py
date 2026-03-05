@@ -219,23 +219,20 @@ st.markdown("""
   /* 모든 버튼 높이 통일 (네비게이션 정렬) */
   .stButton > button { min-height: 52px !important; }
 
-  /* 숙소 종류 선택 버튼 — 높이·간격 축소 */
-  .rt-selected .stButton > button,
-  .rt-unselected .stButton > button {
+  /* 숙소 종류 버튼 — 높이 */
+  [data-testid="stColumn"]:has(.rt-col-anchor) .stButton > button {
     min-height: 38px !important; max-height: 38px !important;
     padding: 4px 12px !important; font-size: 14px !important;
   }
-  .rt-selected, .rt-unselected { margin-bottom: -6px; }
-
-  /* 숙소 종류 컬럼 — 자치구 선택과 상단 정렬 */
-  [data-testid="stColumn"]:has(.rt-col-anchor) > [data-testid="stVerticalBlock"] {
-    margin-top: -10px !important;
+  /* 숙소 종류 버튼 — 간격 축소 */
+  [data-testid="stColumn"]:has(.rt-col-anchor) [data-testid="stVerticalBlock"] {
+    gap: 4px !important;
   }
 
   /* 인테리어 스타일 선택 버튼 — 소형 */
-  .style-sel-btn .stButton > button {
-    min-height: 28px !important; max-height: 28px !important;
-    padding: 2px 6px !important; font-size: 11px !important;
+  [data-testid="stColumn"]:has(.style-sel-btn) .stButton > button {
+    min-height: 26px !important; max-height: 26px !important;
+    padding: 1px 4px !important; font-size: 11px !important;
     font-weight: 500 !important;
   }
 
@@ -823,15 +820,13 @@ def step1():
         room_types = ["entire_home", "private_room", "hotel_room", "shared_room"]
         for rt in room_types:
             selected = st.session_state.room_type == rt
-            css_class = "rt-selected" if selected else "rt-unselected"
             icon = ROOM_TYPE_ICONS.get(rt, "")
             check = "✓ " if selected else ""
             label = f"{check}{icon} {ROOM_TYPE_KR.get(rt, rt)}"
-            st.markdown(f'<div class="{css_class}">', unsafe_allow_html=True)
-            if st.button(label, key=f"rt_{rt}", use_container_width=True):
+            if st.button(label, key=f"rt_{rt}", use_container_width=True,
+                         type="primary" if selected else "secondary"):
                 st.session_state.room_type = rt
                 st.rerun()
-            st.markdown("</div>", unsafe_allow_html=True)
 
     # ── 호스터 유형 선택 ──────────────────────────────────────────────────────
     st.markdown('<hr style="border:none;border-top:1.5px solid #F0F0F0;margin:24px 0 20px;">', unsafe_allow_html=True)
@@ -974,10 +969,10 @@ def step2_new():
     for i, style in enumerate(ROOM_STYLES):
         is_sel = st.session_state.my_room_style == style
         style_cols[i].markdown(
-            f'<div style="text-align:center;padding:12px 4px 10px;border-radius:10px;cursor:pointer;'
+            f'<div style="text-align:center;padding:18px 8px 16px;border-radius:10px;cursor:pointer;'
             f'background:{"#FFF0EE" if is_sel else "#F7F7F7"};'
             f'border:2px solid {"#FF5A5F" if is_sel else "transparent"};">'
-            f'<div style="font-size:13px;font-weight:{"700" if is_sel else "500"};'
+            f'<div style="font-size:15px;font-weight:{"700" if is_sel else "500"};'
             f'color:{"#FF5A5F" if is_sel else "#484848"};line-height:1.3;">{style}</div>'
             f'</div>',
             unsafe_allow_html=True,
