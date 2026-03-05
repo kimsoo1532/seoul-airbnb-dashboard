@@ -224,10 +224,6 @@ st.markdown("""
     min-height: 38px !important; max-height: 38px !important;
     padding: 4px 12px !important; font-size: 14px !important;
   }
-  /* 숙소 종류 버튼 — 간격 축소 */
-  [data-testid="stColumn"]:has(.rt-col-anchor) [data-testid="stVerticalBlock"] {
-    gap: 4px !important;
-  }
 
   /* 인테리어 스타일 선택 버튼 — 소형 */
   [data-testid="stColumn"]:has(.style-sel-btn) .stButton > button {
