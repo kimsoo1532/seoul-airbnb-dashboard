@@ -219,6 +219,14 @@ st.markdown("""
   /* 모든 버튼 높이 통일 (네비게이션 정렬) */
   .stButton > button { min-height: 52px !important; }
 
+  /* 숙소 종류 선택 버튼 — 높이·간격 축소 */
+  .rt-selected .stButton > button,
+  .rt-unselected .stButton > button {
+    min-height: 38px !important; max-height: 38px !important;
+    padding: 4px 12px !important; font-size: 14px !important;
+  }
+  .rt-selected, .rt-unselected { margin-bottom: -6px; }
+
   /* 히어로 섹션 */
   .hero-section {
     background: linear-gradient(135deg, #FF5A5F 0%, #E8484D 60%, #C62828 100%);
@@ -862,37 +870,6 @@ def step1():
             st.rerun()
         st.markdown("</div>", unsafe_allow_html=True)
 
-    # ── 피처 하이라이트 ──────────────────────────────────────────────────────
-    st.markdown('<hr style="border:none;border-top:1.5px solid #F0F0F0;margin:24px 0 20px;">', unsafe_allow_html=True)
-    st.markdown("""
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px;">
-      <div style="background:white;border-radius:14px;padding:16px 12px;text-align:center;
-        box-shadow:0 2px 10px rgba(0,0,0,0.06);border:1.5px solid #FFF0EE;">
-        <div style="font-size:28px;margin-bottom:6px;">📊</div>
-        <div style="font-weight:700;font-size:12px;color:#484848;margin-bottom:4px;">수익 분석</div>
-        <div style="font-size:10px;color:#888;">손익 + RevPAR 비교</div>
-      </div>
-      <div style="background:white;border-radius:14px;padding:16px 12px;text-align:center;
-        box-shadow:0 2px 10px rgba(0,0,0,0.06);border:1.5px solid #FFF0EE;">
-        <div style="font-size:28px;margin-bottom:6px;">💡</div>
-        <div style="font-weight:700;font-size:12px;color:#484848;margin-bottom:4px;">요금 추천</div>
-        <div style="font-size:10px;color:#888;">단계별 적정 요금</div>
-      </div>
-      <div style="background:white;border-radius:14px;padding:16px 12px;text-align:center;
-        box-shadow:0 2px 10px rgba(0,0,0,0.06);border:1.5px solid #FFF0EE;">
-        <div style="font-size:28px;margin-bottom:6px;">🗺️</div>
-        <div style="font-weight:700;font-size:12px;color:#484848;margin-bottom:4px;">위치 분석</div>
-        <div style="font-size:10px;color:#888;">2km 내 관광지 분석</div>
-      </div>
-      <div style="background:white;border-radius:14px;padding:16px 12px;text-align:center;
-        box-shadow:0 2px 10px rgba(0,0,0,0.06);border:1.5px solid #FFF0EE;">
-        <div style="font-size:28px;margin-bottom:6px;">🏙️</div>
-        <div style="font-weight:700;font-size:12px;color:#484848;margin-bottom:4px;">시장 진단</div>
-        <div style="font-size:10px;color:#888;">자치구 군집 전략</div>
-      </div>
-    </div>
-    """, unsafe_allow_html=True)
-
     if ht is None:
         st.info("위에서 호스터 유형을 선택해야 다음 단계로 넘어갈 수 있습니다.")
     else:
@@ -923,19 +900,7 @@ def step2_new():
     )
 
     bench = get_bench(st.session_state.district, st.session_state.room_type)
-    b_adr = bench_val(bench, "ttm_avg_rate", 100000)
     b_adr_p25 = bench_val(bench, "ttm_avg_rate", 70000, 25)
-    d_name = dn(st.session_state.district)
-    rt_name = ROOM_TYPE_KR.get(st.session_state.room_type, "")
-
-    st.markdown(
-        f'<div style="background:#F7F7F7;border-radius:10px;padding:12px 18px;margin-bottom:16px;">'
-        f'<span style="font-size:13px;font-weight:600;color:#484848;">📊 {d_name} {rt_name} — 지역 참고값</span><br>'
-        f'<span style="font-size:13px;color:#767676;">'
-        f'평균 1박 요금 <b>₩{int(b_adr):,}</b> &nbsp;|&nbsp; 하위 25% <b>₩{int(b_adr_p25):,}</b>'
-        f'</span></div>',
-        unsafe_allow_html=True,
-    )
 
     # ── 요금 & 사진 수 ────────────────────────────────────────────────────────
     r1c1, r1c2 = st.columns(2)
@@ -997,17 +962,23 @@ def step2_new():
     for i, style in enumerate(ROOM_STYLES):
         is_sel = st.session_state.my_room_style == style
         style_cols[i].markdown(
-            f'<div style="text-align:center;padding:8px 4px;border-radius:10px;cursor:pointer;'
+            f'<div style="text-align:center;padding:12px 4px 10px;border-radius:10px;cursor:pointer;'
             f'background:{"#FFF0EE" if is_sel else "#F7F7F7"};'
             f'border:2px solid {"#FF5A5F" if is_sel else "transparent"};">'
-            f'<div style="font-size:11px;font-weight:{"700" if is_sel else "400"};'
-            f'color:{"#FF5A5F" if is_sel else "#484848"};">{style}</div>'
+            f'<div style="font-size:13px;font-weight:{"700" if is_sel else "500"};'
+            f'color:{"#FF5A5F" if is_sel else "#484848"};line-height:1.3;">{style}</div>'
             f'</div>',
+            unsafe_allow_html=True,
+        )
+        # 선택 버튼 — 높이 최소화
+        style_cols[i].markdown(
+            '<div style="margin-top:-6px;">',
             unsafe_allow_html=True,
         )
         if style_cols[i].button("선택" if not is_sel else "✓", key=f"style_{i}", use_container_width=True):
             st.session_state.my_room_style = style
             st.rerun()
+        style_cols[i].markdown("</div>", unsafe_allow_html=True)
 
     # ── 숙소 주소 입력 ────────────────────────────────────────────────────────
     st.markdown(
@@ -1315,6 +1286,33 @@ def step4_existing():
             if dc:
                 st.session_state.my_lat, st.session_state.my_lng = dc
                 st.session_state.my_location_name = dn(st.session_state.district) + " (자치구 평균)"
+
+    # ── 숙소 구성 (기존 호스터도 입력) ──────────────────────────────────────
+    st.markdown('<hr style="border:none;border-top:1px solid #F0F0F0;margin:20px 0 14px;">', unsafe_allow_html=True)
+    st.markdown(
+        '<div style="font-weight:700;font-size:14px;color:#484848;margin-bottom:10px;">🛏️ 숙소 구성</div>',
+        unsafe_allow_html=True,
+    )
+    sc1, sc2, sc3, sc4 = st.columns(4)
+    with sc1:
+        _raw_g = st.session_state.my_guests
+        default_g = max(1, int(_raw_g) if _raw_g is not None else int(bench_val(bench, "guests", 2)))
+        my_guests = st.number_input("👥 최대 숙박 인원", 1, 20, default_g, key="ex_guests")
+        st.session_state.my_guests = my_guests
+    with sc2:
+        _raw_br = st.session_state.my_bedrooms
+        default_br = max(1, int(_raw_br) if _raw_br is not None else int(bench_val(bench, "bedrooms", 1)))
+        my_bedrooms = st.number_input("🛏️ 침실 수", 0, 20, default_br, key="ex_bedrooms")
+        st.session_state.my_bedrooms = my_bedrooms
+    with sc3:
+        _raw_bt = st.session_state.my_baths_count
+        default_bt = max(1, int(_raw_bt) if _raw_bt is not None else int(bench_val(bench, "baths", 1)))
+        my_baths = st.number_input("🚿 욕실 수", 0, 10, default_bt, key="ex_baths")
+        st.session_state.my_baths_count = my_baths
+    with sc4:
+        beds_default = int(st.session_state.my_beds) if st.session_state.my_beds else max(1, int(bench_val(bench, "beds", 1)))
+        my_beds = st.number_input("🛌 침대 수", 0, 20, beds_default, key="ex_beds")
+        st.session_state.my_beds = my_beds
 
     st.markdown("<div style='margin-top:20px;'></div>", unsafe_allow_html=True)
     nc1, nc2 = st.columns(2)
